@@ -143,9 +143,9 @@ public class ConceptGoBildaStarterKitRobotTeleop_IntoTheDeep extends LinearOpMod
 
 
         /* Define and Initialize Motors */
-        leftDrive  = hardwareMap.get(DcMotor.class, "left_front_drive"); //the left drivetrain motor
-        rightDrive = hardwareMap.get(DcMotor.class, "right_front_drive"); //the right drivetrain motor
-        armMotor   = hardwareMap.get(DcMotor.class, "left_arm"); //the arm motor
+        leftDrive  = hardwareMap.get(DcMotor.class, "leftMotor"); //the left drivetrain motor
+        rightDrive = hardwareMap.get(DcMotor.class, "rightMotor"); //the right drivetrain motor
+        armMotor   = hardwareMap.get(DcMotor.class, "armMotor"); //the arm motor
 
 
         /* Most skid-steer/differential drive robots require reversing one motor to drive forward.
