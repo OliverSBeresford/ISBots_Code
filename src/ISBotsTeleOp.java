@@ -104,6 +104,7 @@ public class ISBotsTeleOp extends LinearOpMode {
         double forward;
         double rotate;
         double max;
+        double wristPosition;
 
 
         /* Define and Initialize Motors */
@@ -202,7 +203,8 @@ public class ISBotsTeleOp extends LinearOpMode {
             if(gamepad1.right_bumper) {
                 /* This is the intaking/collecting arm position */
                 armPosition = ARM_COLLECT;
-                wrist.setPosition(WRIST_FOLDED_OUT);
+                wristPosition = WRIST_FOLDED_OUT;
+                // wrist.setPosition(WRIST_FOLDED_OUT);
                 intake.setPower(INTAKE_COLLECT);
             }
 
@@ -221,27 +223,31 @@ public class ISBotsTeleOp extends LinearOpMode {
                 back to folded inside the robot. This is also the starting configuration */
                 armPosition = ARM_COLLAPSED_INTO_ROBOT;
                 intake.setPower(INTAKE_OFF);
-                wrist.setPosition(WRIST_FOLDED_IN);
+                // wrist.setPosition(WRIST_FOLDED_IN);
+                wristPosition = WRIST_FOLDED_IN;
             }
 
             else if (gamepad1.dpad_right){
                 /* This is the correct height to score SPECIMEN on the HIGH CHAMBER */
                 armPosition = ARM_SCORE_SPECIMEN;
-                wrist.setPosition(WRIST_FOLDED_IN);
+                // wrist.setPosition(WRIST_FOLDED_IN);
+                wristPosition = WRIST_FOLDED_IN;
             }
 
             else if (gamepad1.dpad_up){
                 /* This sets the arm to vertical to hook onto the LOW RUNG for hanging */
                 armPosition = ARM_ATTACH_HANGING_HOOK;
                 intake.setPower(INTAKE_OFF);
-                wrist.setPosition(WRIST_FOLDED_IN);
+                // wrist.setPosition(WRIST_FOLDED_IN);
+                wristPosition = WRIST_FOLDED_IN;
             }
 
             else if (gamepad1.dpad_down){
                 /* this moves the arm down to lift the robot up once it has been hooked */
                 armPosition = ARM_WINCH_ROBOT;
                 intake.setPower(INTAKE_OFF);
-                wrist.setPosition(WRIST_FOLDED_IN);
+                // wrist.setPosition(WRIST_FOLDED_IN);
+                wristPosition = WRIST_FOLDED_IN;
             }
 
 
@@ -259,6 +265,8 @@ public class ISBotsTeleOp extends LinearOpMode {
             ((DcMotorEx) armMotor).setVelocity(2100);
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+            /* Changing the wrist's position */
+            wrist.setPosition(wristPosition);
 
             /* Check to see if our arm is over the current limit, and report via telemetry. */
             if (((DcMotorEx) armMotor).isOverCurrent()){
