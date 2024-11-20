@@ -250,14 +250,14 @@ public class ISBotsTeleOp extends LinearOpMode {
                 wristPosition = WRIST_FOLDED_IN;
             }
 
-            else if (gamepad1.dpad_right){
+            else if (gamepad1.dpad_right) {
                 /* This is the correct height to score SPECIMEN on the HIGH CHAMBER */
                 armPosition = ARM_SCORE_SPECIMEN;
                 // wrist.setPosition(WRIST_FOLDED_IN);
                 wristPosition = WRIST_FOLDED_IN;
             }
 
-            else if (gamepad1.dpad_up){
+            else if (gamepad1.dpad_up) {
                 /* This sets the arm to vertical to hook onto the LOW RUNG for hanging */
                 armPosition = ARM_ATTACH_HANGING_HOOK;
                 intakePower = INTAKE_OFF;
@@ -265,7 +265,7 @@ public class ISBotsTeleOp extends LinearOpMode {
                 wristPosition = WRIST_FOLDED_IN;
             }
 
-            else if (gamepad1.dpad_down){
+            else if (gamepad1.dpad_down) {
                 /* this moves the arm down to lift the robot up once it has been hooked */
                 armPosition = ARM_WINCH_ROBOT;
                 intakePower = INTAKE_OFF;
