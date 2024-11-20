@@ -191,6 +191,9 @@ public class ISBotsTeleOp extends LinearOpMode {
 
             if (gamepad1.a) {
                 intake.setPower(INTAKE_COLLECT);
+                if (gamepad1.x) {
+                    wristPosition = WRIST_FOLDED_OUT;
+                }
             }
             else if (gamepad1.x) {
                 intake.setPower(INTAKE_OFF);
