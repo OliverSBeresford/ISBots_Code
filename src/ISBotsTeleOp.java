@@ -104,7 +104,11 @@ public class ISBotsTeleOp extends LinearOpMode {
         double forward;
         double rotate;
         double max;
-        double wristPosition;
+        double wristPosition = WRIST_FOLDED_IN;
+        double intakePower = INTAKE_OFF;
+        boolean lastAState = false;
+        boolean lastXState = false;
+        boolean lastBState = false;
 
 
         /* Define and Initialize Motors */
@@ -189,19 +193,34 @@ public class ISBotsTeleOp extends LinearOpMode {
             If the user presses X, it sets the servo to Off.
             And if the user presses B it reveres the servo to spit out the element.*/
 
-            if (gamepad1.a) {
-                intake.setPower(INTAKE_COLLECT);
-                
-                if (gamepad1.x) {
-                    wristPosition = WRIST_FOLDED_OUT;
+            // If you click a (do only once before you take your finger off)
+            if (gamepad1.a && !lastAState) {
+                if (intakePower == INTAKE_OFF) {
+                    intakePower = INTAKE_COLLECT;
+                } else if (intakePower == INTAKE_COLLECT) {
+                    intakePower = INTAKE_OFF;
                 }
             }
-            else if (gamepad1.x) {
-                intake.setPower(INTAKE_OFF);
+            // If you click x (do only once before you take your finger off)
+            else if (gamepad1.x && !lastXState) {
+                if (wristPosition == WRIST_FOLDED_IN) {
+                    wristPosition = WRIST_FOLDED_OUT;
+                } else {
+                    wristPosition = WRIST_FOLDED_IN;
+                }
             }
-            else if (gamepad1.b) {
-                intake.setPower(INTAKE_DEPOSIT);
+            // If you click b (do only once before you take your finger off)
+            if (gamepad1.b && !lastBState) {
+                if (intakePower == INTAKE_OFF) {
+                    intakePower = INTAKE_DEPOSIT;
+                } else if (intakePower == INTAKE_DEPOSIT) {
+                    intakePower = INTAKE_OFF;
+                }
             }
+            // Saving the states of each button
+            lastAState = gamepad1.a;
+            lastBState = gamepad1.b;
+            lastXState = gamepad1.x;
 
             /* Arm control */
             if(gamepad1.right_bumper) {
@@ -209,7 +228,7 @@ public class ISBotsTeleOp extends LinearOpMode {
                 armPosition = ARM_COLLECT;
                 wristPosition = WRIST_FOLDED_OUT;
                 // wrist.setPosition(WRIST_FOLDED_OUT);
-                intake.setPower(INTAKE_COLLECT);
+                intakePower = INTAKE_COLLECT;
             }
 
             else if (gamepad1.left_bumper) {
@@ -226,7 +245,7 @@ public class ISBotsTeleOp extends LinearOpMode {
                 /* This turns off the intake, folds in the wrist, and moves the arm
                 back to folded inside the robot. This is also the starting configuration */
                 armPosition = ARM_COLLAPSED_INTO_ROBOT;
-                intake.setPower(INTAKE_OFF);
+                intakePower = INTAKE_OFF;
                 // wrist.setPosition(WRIST_FOLDED_IN);
                 wristPosition = WRIST_FOLDED_IN;
             }
@@ -241,7 +260,7 @@ public class ISBotsTeleOp extends LinearOpMode {
             else if (gamepad1.dpad_up){
                 /* This sets the arm to vertical to hook onto the LOW RUNG for hanging */
                 armPosition = ARM_ATTACH_HANGING_HOOK;
-                intake.setPower(INTAKE_OFF);
+                intakePower = INTAKE_OFF;
                 // wrist.setPosition(WRIST_FOLDED_IN);
                 wristPosition = WRIST_FOLDED_IN;
             }
@@ -249,7 +268,7 @@ public class ISBotsTeleOp extends LinearOpMode {
             else if (gamepad1.dpad_down){
                 /* this moves the arm down to lift the robot up once it has been hooked */
                 armPosition = ARM_WINCH_ROBOT;
-                intake.setPower(INTAKE_OFF);
+                intakePower = INTAKE_OFF;
                 // wrist.setPosition(WRIST_FOLDED_IN);
                 wristPosition = WRIST_FOLDED_IN;
             }
@@ -271,6 +290,9 @@ public class ISBotsTeleOp extends LinearOpMode {
 
             /* Changing the wrist's position */
             wrist.setPosition(wristPosition);
+
+            // Changing the intake power
+            intake.setPower(intakePower);
 
             /* Check to see if our arm is over the current limit, and report via telemetry. */
             if (((DcMotorEx) armMotor).isOverCurrent()){
