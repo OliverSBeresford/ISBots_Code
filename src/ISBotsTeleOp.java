@@ -85,6 +85,7 @@ public class ISBotsTeleOp extends LinearOpMode {
     /* Variables to store the positions that the wrist should be set to when folding in, or folding out. */
     final double WRIST_FOLDED_IN   = 0.8333;
     final double WRIST_FOLDED_OUT  = 0.5;
+    final double WRIST_FOLDED_LEFT = 0.1667;
 
     /* A number in degrees that the triggers can adjust the arm position by */
     final double FUDGE_FACTOR = 15 * ARM_TICKS_PER_DEGREE;
@@ -205,6 +206,8 @@ public class ISBotsTeleOp extends LinearOpMode {
             else if (gamepad1.x && !lastXState) {
                 if (wristPosition == WRIST_FOLDED_IN) {
                     wristPosition = WRIST_FOLDED_OUT;
+                } else if (wristPosition == WRIST_FOLDED_OUT) {
+                    wristPosition = WRIST_FOLDED_LEFT;
                 } else {
                     wristPosition = WRIST_FOLDED_IN;
                 }
