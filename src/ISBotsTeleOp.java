@@ -106,6 +106,7 @@ public class ISBotsTeleOp extends LinearOpMode {
         double rotate;
         double max;
         double wristPosition = WRIST_FOLDED_IN;
+        double lastWristPosition = WRIST_FOLDED_IN;
         double intakePower = INTAKE_OFF;
         boolean lastAState = false;
         boolean lastXState = false;
@@ -204,12 +205,14 @@ public class ISBotsTeleOp extends LinearOpMode {
             }
             // If you click x (do only once before you take your finger off)
             else if (gamepad1.x && !lastXState) {
-                if (wristPosition == WRIST_FOLDED_IN) {
+                if (wristPosition == WRIST_FOLDED_IN || wristPosition == WRIST_FOLDED_LEFT) {
                     wristPosition = WRIST_FOLDED_OUT;
-                } else if (wristPosition == WRIST_FOLDED_OUT) {
+                } else if (wristPosition == WRIST_FOLDED_OUT && lastWristPosition == WRIST_FOLDED_IN) {
                     wristPosition = WRIST_FOLDED_LEFT;
-                } else {
+                    lastWristPosition = WRIST_FOLDED_LEFT;
+                } else if (wristPosition == WRIST_FOLDED_OUT && lastWristPosition == WRIST_FOLDED_LEFT) {
                     wristPosition = WRIST_FOLDED_IN;
+                    lastWristPosition = WRIST_FOLDED_IN;
                 }
             }
             // If you click b (do only once before you take your finger off)
