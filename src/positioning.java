@@ -14,8 +14,8 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
-@TeleOp(name = "testAprilTag (Blocks to Java)")
-public class testAprilTag extends LinearOpMode {
+@TeleOp(name = "Test Robot Navigation")
+public class Positioning extends LinearOpMode {
 
     boolean USE_WEBCAM;
     AprilTagProcessor myAprilTagProcessor;
@@ -63,6 +63,7 @@ public class testAprilTag extends LinearOpMode {
         // the camera is horizontal. Use a yaw of 0 if the camera is pointing forwards, +90 degrees if
         // it's pointing straight left, -90 degrees for straight right, etc. You can also set the roll
         // to +/-90 degrees if it's vertical, or 180 degrees if it's upside-down.
+        
         // Position(DistanceUnit unit, double x, double y, double z, long acquisitionTime)
         cameraPosition = new Position(DistanceUnit.CM, 5, 21.5, 18, 0);
         // YawPitchRollAngles(AngleUnit angleUnit, double yaw, double pitch, double roll, long acquisitionTime)
