@@ -1,0 +1,139 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+
+@Autonomous(name = "Block Picker & Basket Placer", group = "Linear Opmode")
+public class BlockPickerBasketPlacer extends LinearOpMode {
+
+    // Hardware components
+    private DcMotor leftDrive;
+    private DcMotor rightDrive;
+    private DcMotor armMotor;
+    private Servo clawServo;
+    private ColorSensor colorSensor;
+
+    @Override
+    public void runOpMode() {
+        // Initialize hardware
+        leftDrive = hardwareMap.get(DcMotor.class, "leftMotor");
+        rightDrive = hardwareMap.get(DcMotor.class, "rightMotor");
+        armMotor = hardwareMap.get(DcMotor.class, "armMotor");
+        clawServo = hardwareMap.get(Servo.class, "clawServo");
+        colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+
+        // Set motor directions
+        leftDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightDrive.setDirection(DcMotor.Direction.REVERSE);
+        armMotor.setDirection(DcMotor.Direction.FORWARD);
+
+        // Indicate initialization complete
+        telemetry.addLine("Initialization Complete. Waiting for Start...");
+        telemetry.update();
+
+        // Wait for the game to start
+        waitForStart();
+
+        if (opModeIsActive()) {
+            // Step 1: Move forward to detect blocks
+            moveForward(0.5, 1500);
+
+            // Step 2: Detect the color of the block
+            if (isRedBlock()) {
+                telemetry.addLine("Red block detected!");
+                moveToBasket(-72, -72);
+            } else if (isBlueBlock()) {
+                telemetry.addLine("Blue block detected!");
+                moveToBasket(72, 72);
+            } else if (isYellowBlock()) {
+                telemetry.addLine("Yellow block detected!");
+                moveToBasket(-72, -72); // Assuming the yellow basket shares a location with red
+            } else {
+                telemetry.addLine("No valid block detected. Stopping...");
+                stopAllMotors();
+                return;
+            }
+
+            // Step 3: Pick up the block
+            pickUpBlock();
+
+            // Step 4: Drop block in the basket
+            dropBlockInBasket();
+
+            // Step 5: Move back and reset
+            moveBackward(0.5, 1000);
+            resetArmPosition();
+
+            telemetry.addLine("Task Complete.");
+            telemetry.update();
+        }
+    }
+
+    // Helper functions
+
+    private void moveForward(double power, long duration) {
+        leftDrive.setPower(power);
+        rightDrive.setPower(power);
+        sleep(duration);
+        stopAllMotors();
+    }
+
+    private void moveBackward(double power, long duration) {
+        leftDrive.setPower(-power);
+        rightDrive.setPower(-power);
+        sleep(duration);
+        stopAllMotors();
+    }
+
+    private void stopAllMotors() {
+        leftDrive.setPower(0);
+        rightDrive.setPower(0);
+        armMotor.setPower(0);
+    }
+
+    private void moveToBasket(int x, int y) {
+        // Placeholder for navigation logic based on field layout
+        // You would implement actual pathfinding here
+        telemetry.addData("Moving to Basket at", "(%d, %d)", x, y);
+        telemetry.update();
+        sleep(1000); // Simulate movement
+    }
+
+    private void pickUpBlock() {
+        clawServo.setPosition(1.0); // Close the claw to grab the block
+        sleep(500);
+        liftArm();
+    }
+
+    private void liftArm() {
+        armMotor.setPower(0.5); // Raise the arm
+        sleep(1500); // Adjust based on arm height required
+        armMotor.setPower(0);
+    }
+
+    private void dropBlockInBasket() {
+        clawServo.setPosition(0.0); // Open the claw to release the block
+        sleep(500);
+    }
+
+    private void resetArmPosition() {
+        armMotor.setPower(-0.5); // Lower the arm
+        sleep(1500); // Adjust based on arm reset time
+        armMotor.setPower(0);
+    }
+
+    private boolean isRedBlock() {
+        return colorSensor.red() > colorSensor.blue() && colorSensor.red() > colorSensor.green();
+    }
+
+    private boolean isBlueBlock() {
+        return colorSensor.blue() > colorSensor.red() && colorSensor.blue() > colorSensor.green();
+    }
+
+    private boolean isYellowBlock() {
+        return colorSensor.green() > colorSensor.red() && colorSensor.green() > colorSensor.blue();
+    }
+}
