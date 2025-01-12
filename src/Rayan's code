@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import org.firstinspires.ftc.teamcode.utils.RobotUtils;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -239,16 +240,19 @@ public class PathfindingBlockPlacement extends LinearOpMode {
     }
 
     private void turnLeft(int degrees) {
-        // Logic for turning left
+        // Use the turnDegrees function to turn left using the IMU
+        RobotUtils.turnDegrees(leftDrive, rightDrive, imu, -(degrees));
         telemetry.addData("Turning Left", "%d degrees", degrees);
         telemetry.update();
-        sleep(500); // Placeholder
+        sleep(10); // Placeholder
     }
 
     private void turnRight(int degrees) {
-        // Logic for turning right
+        // Use the turnDegrees function to turn right using the IMU
+        RobotUtils.turnDegrees(leftDrive, rightDrive, imu, -(degrees));
         telemetry.addData("Turning Right", "%d degrees", degrees);
         telemetry.update();
-        sleep(500); // Placeholder
+        sleep(10); // Placeholder
     }
+
 }
