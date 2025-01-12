@@ -249,7 +249,7 @@ public class PathfindingBlockPlacement extends LinearOpMode {
 
     private void turnRight(int degrees) {
         // Use the turnDegrees function to turn right using the IMU
-        RobotUtils.turnDegrees(leftDrive, rightDrive, imu, -(degrees));
+        RobotUtils.turnDegrees(leftDrive, rightDrive, imu, degrees);
         telemetry.addData("Turning Right", "%d degrees", degrees);
         telemetry.update();
         sleep(10); // Placeholder
