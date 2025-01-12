@@ -60,4 +60,42 @@ public class RobotUtils {
         leftDrive.setPower(0);
         rightDrive.setPower(0);
     }
+
+    public void driveStraight(DcMotor leftDrive, DcMotor rightDrive, IMU imu, double distanceInInches, double power, double targetHeading) {
+        int ticksPerRevolution = ((((1+(46/17))) * (1+(46/11))) * 28); // Example for a typical motor
+        double wheelDiameter = 3.77953; // In inches
+        double wheelCircumference = Math.PI * wheelDiameter;
+        int targetTicks = (int)((distanceInInches / wheelCircumference) * ticksPerRevolution);
+    
+        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    
+        leftDrive.setTargetPosition(targetTicks);
+        rightDrive.setTargetPosition(targetTicks);
+    
+        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        leftDrive.setPower(power);
+        rightDrive.setPower(power);
+        
+        // Keep adjusting the heading while we aren't there yet
+        while (leftDrive.isBusy() && rightDrive.isBusy()) {
+            // Check the current heading
+            double currentHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            double error = targetHeading - currentHeading;
+    
+            // Adjust motor power to correct heading
+            double correction = error * 0.02; // Proportional constant
+            leftDrive.setPower(power + correction);
+            rightDrive.setPower(power - correction);
+        }
+    
+        leftDrive.setPower(0);
+        rightDrive.setPower(0);
+    
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+    
 }
