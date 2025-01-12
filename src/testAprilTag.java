@@ -139,9 +139,15 @@ public class testAprilTag extends LinearOpMode {
             myAprilTagDetection = myAprilTagDetection_item2;
             // Display info about the detection.
             if (myAprilTagDetection.metadata != null) {
+                // Field-relative data
                 telemetry.addLine("==== (ID " + myAprilTagDetection.id + ") " + myAprilTagDetection.metadata.name);
                 telemetry.addLine("XYZ " + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getPosition().x, 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getPosition().y, 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getPosition().z, 6, 1) + "    (inch)");
                 telemetry.addLine("PRY " + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getOrientation().getPitch(), 6, 1) + "" + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getOrientation().getRoll(), 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getOrientation().getYaw(), 6, 1) + "    (deg)");
+                // Raw data (relative to the apriltag)
+                // Field-relative data
+                telemetry.addLine("==== (ID " + myAprilTagDetection.id + ") " + myAprilTagDetection.metadata.name);
+                telemetry.addLine("XYZ (RAW) " + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getPosition().x, 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getPosition().y, 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getPosition().z, 6, 1) + "    (inch)");
+                telemetry.addLine("PRY (RAW) " + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getOrientation().getPitch(), 6, 1) + "" + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getOrientation().getRoll(), 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getOrientation().getYaw(), 6, 1) + "    (deg)");
             } else {
                 telemetry.addLine("==== (ID " + myAprilTagDetection.id + ") Unknown");
                 telemetry.addLine("Center " + JavaUtil.formatNumber(myAprilTagDetection.center.x, 6, 0) + "" + JavaUtil.formatNumber(myAprilTagDetection.center.y, 6, 0) + " (pixels)");
