@@ -121,13 +121,13 @@ public class PathfindingBlockPlacement extends LinearOpMode {
             // Step 2: Detect the color of the block
             if (isRedBlock()) {
                 telemetry.addLine("Red block detected!");
-                moveToBasket(-72, -72);
+                moveToBasket(-72, -72); // We are red
             } else if (isBlueBlock()) {
                 telemetry.addLine("Blue block detected!");
-                moveToBasket(72, 72);
+                moveToBasket(72, 72); // Moving to the other basket, but in practice we would just leave it if we are the red team
             } else if (isYellowBlock()) {
                 telemetry.addLine("Yellow block detected!");
-                moveToBasket(-72, -72); // Assuming yellow shares red's basket
+                moveToBasket(-72, -72); // We are red
             } else {
                 telemetry.addLine("No valid block detected. Stopping...");
                 stopAllMotors();
