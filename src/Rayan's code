@@ -113,7 +113,7 @@ public class PathfindingBlockPlacement extends LinearOpMode {
         // Wait for the game to start
         waitForStart();
 
-        if (opModeIsActive()) {
+        while (opModeIsActive()) {
             // Step 1: Move forward to detect blocks
             moveForward(0.5, 1500);
 
