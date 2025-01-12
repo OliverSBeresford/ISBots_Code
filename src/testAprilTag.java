@@ -100,7 +100,7 @@ public class testAprilTag extends LinearOpMode {
 
         // First, create an AprilTagProcessor.Builder.
         myAprilTagProcessorBuilder = new AprilTagProcessor.Builder();
-        // myAprilTagProcessorBuilder.setCameraPose(cameraPosition, cameraOrientation);
+        myAprilTagProcessorBuilder.setCameraPose(cameraPosition, cameraOrientation);
         // Create an AprilTagProcessor by calling build.
         // Create the AprilTag processor and assign it to a variable.
         myAprilTagProcessor = myAprilTagProcessorBuilder.build();
