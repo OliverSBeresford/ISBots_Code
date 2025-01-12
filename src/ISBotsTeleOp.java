@@ -322,4 +322,75 @@ public class ISBotsTeleOp extends LinearOpMode {
 
         }
     }
+
+    private void turnDegrees(double turnAngle) {
+        double currentAngle;
+        double error;
+        double turnPower;
+        double kP = 0.02; // Proportional constant, adjust for your robot
+        double minPower = 0.1; // Minimum power to ensure the motors turn the robot
+
+    
+        // Determine the direction to turn and target heading
+        double startingAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        double targetHeading = startingAngle + turnAngle;
+    
+        if (targetHeading > 180) {
+            targetHeading -= 360; // Wrap around for angles > 180 degrees
+        } else if (targetHeading < -180) {
+            targetHeading += 360; // Wrap around for angles < -180 degrees
+        }
+    
+        // Control loop to adjust motor power
+        do {
+            // Get the current angle and calculate error
+            currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            error = targetHeading - currentAngle;
+    
+            // Normalize error to the range -180 to 180 degrees
+            if (error > 180) {
+                error -= 360;
+            } else if (error < -180) {
+                error += 360;
+            }
+    
+            // Calculate motor power based on proportional control
+            turnPower = kP * error;
+    
+            // Ensure the power is sufficient to move the robot but not excessive
+            if (Math.abs(turnPower) < minPower) {
+                turnPower = Math.copySign(minPower, turnPower);
+            }
+            // Ensure the absolute value of the power is no greater than 1
+            if (Math.abs(turnPower) > 1) {
+                turnPower = Math.copySign(1, turnPower);
+            }
+        
+            /* Add how much we rotate with how much we are moving forwards
+            to calculate how much power each motor needs. Positive turnPower value on 
+            the means rotation to the right due to higher power
+            on the left side and vice versa :0
+            */
+            left  = forward + rotate;
+            right = forward - rotate;
+
+            /* Normalize the values so neither exceed +/- 1.0 */
+            max = Math.max(Math.abs(left), Math.abs(right));
+            if (max > 1.0) {
+                left /= max;
+                right /= max;
+            }
+
+            /* Set the motor power to the variables we've mixed and normalized */
+            leftDrive.setPower(left);
+            rightDrive.setPower(right);
+    
+            // Allow time for the motors to respond
+            sleep(10);
+        } while (Math.abs(error) < 1); // Stop turning when the error is small
+    
+        // Stop the motors
+        leftDrive.setPower(0);
+        rightDrive.setPower(0);
+    }
 }
