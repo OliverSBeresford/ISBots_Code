@@ -98,4 +98,28 @@ public class RobotUtils {
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
     
+    /**
+     * Initialize AprilTag Detection.
+     */
+    private void initAprilTag(AprilTagProcessor myAprilTagProcessor, Position cameraPosition, YawPitchRollAngles cameraOrientation, VisionPortal myVisionPortal) {
+        AprilTagProcessor.Builder myAprilTagProcessorBuilder;
+        VisionPortal.Builder myVisionPortalBuilder;
+
+        // First, create an AprilTagProcessor.Builder
+        myAprilTagProcessorBuilder = new AprilTagProcessor.Builder();
+        myAprilTagProcessorBuilder.setCameraPose(cameraPosition, cameraOrientation);
+
+        // Create an AprilTagProcessor by calling build.
+        // Create the AprilTag processor and assign it to a variable.
+        myAprilTagProcessor = myAprilTagProcessorBuilder.build();
+        // Next, create a VisionPortal.Builder and set attributes related to the camera.
+        myVisionPortalBuilder = new VisionPortal.Builder();
+        myVisionPortalBuilder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
+
+        // Add myAprilTagProcessor to the VisionPortal.Builder.
+        myVisionPortalBuilder.addProcessor(myAprilTagProcessor);
+        // Create a VisionPortal by calling build.
+        myVisionPortal = myVisionPortalBuilder.build();
+    }
+
 }
