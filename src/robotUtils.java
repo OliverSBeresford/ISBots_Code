@@ -61,7 +61,7 @@ public class RobotUtils {
         rightDrive.setPower(0);
     }
 
-    public void driveStraight(DcMotor leftDrive, DcMotor rightDrive, IMU imu, double distanceInInches, double power, double targetHeading) {
+    public static void driveStraight(DcMotor leftDrive, DcMotor rightDrive, IMU imu, double distanceInInches, double power, double targetHeading) {
         int ticksPerRevolution = ((((1+(46/17))) * (1+(46/11))) * 28); // Example for a typical motor
         double wheelDiameter = 3.77953; // In inches
         double wheelCircumference = Math.PI * wheelDiameter;
@@ -101,7 +101,7 @@ public class RobotUtils {
     /**
      * Initialize AprilTag Detection.
      */
-    private void initAprilTag(AprilTagProcessor myAprilTagProcessor, Position cameraPosition, YawPitchRollAngles cameraOrientation, VisionPortal myVisionPortal) {
+    private static void initAprilTag(AprilTagProcessor myAprilTagProcessor, Position cameraPosition, YawPitchRollAngles cameraOrientation, VisionPortal myVisionPortal) {
         AprilTagProcessor.Builder myAprilTagProcessorBuilder;
         VisionPortal.Builder myVisionPortalBuilder;
 
