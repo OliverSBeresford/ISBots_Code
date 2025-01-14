@@ -19,6 +19,7 @@ public class PathfindingBlockPlacement extends LinearOpMode {
     private CRServo intake;
     private ColorSensor colorSensor;
     private RobotUtils robotUtils;
+    private static final int colorThreshold = 100; // Minimum color value for a block to be detected
 
     // Field dimensions and obstacle location
     private static final double FIELD_SIZE = 144.0; // 144 inches (12x12 ft field)
@@ -226,8 +227,6 @@ public class PathfindingBlockPlacement extends LinearOpMode {
             // Wait for the arm to reset
         }
     }
-
-    private static final int colorThreshold = 100; // Minimum color value for a block to be detected
 
     private boolean isBlockPresent() {
         return (colorSensor.red() > colorThreshold || 
