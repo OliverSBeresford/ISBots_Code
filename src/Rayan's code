@@ -18,6 +18,7 @@ public class PathfindingBlockPlacement extends LinearOpMode {
     private Servo wrist;
     private CRServo intake;
     private ColorSensor colorSensor;
+    private RobotUtils robotUtils;
 
     // Field dimensions and obstacle location
     private static final double FIELD_SIZE = 144.0; // 144 inches (12x12 ft field)
@@ -74,8 +75,7 @@ public class PathfindingBlockPlacement extends LinearOpMode {
     @Override
     public void runOpMode() {
         // Create variables that we will use
-        double wristPosition = WRIST_FOLDED_IN;
-        double lastWristPosition = WRIST_FOLDED_IN;
+        double wristPosition = WRIST_FOLDED_LEFT;
         double intakePower = INTAKE_OFF;
 
         // Initialize hardware
@@ -87,7 +87,7 @@ public class PathfindingBlockPlacement extends LinearOpMode {
         colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.LEFT)));
-
+        robotUtils = new RobotUtils(leftDrive, rightDrive, imu);
 
         // Set motor directions
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -96,7 +96,7 @@ public class PathfindingBlockPlacement extends LinearOpMode {
         /* Before starting the armMotor. We'll make sure the TargetPosition is set to 0.
         Then we'll set the RunMode to RUN_TO_POSITION. And we'll ask it to stop and reset encoder.
         If you do not have the encoder plugged into this motor, it will not run in this code. */
-        armMotor.setTargetPosition(0);
+        armMotor.setTargetPosition(ARM_COLLECT);
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -111,12 +111,13 @@ public class PathfindingBlockPlacement extends LinearOpMode {
         telemetry.addLine("Initialization Complete. Waiting for Start...");
         telemetry.update();
 
+        wrist.setPosition(wristPosition);
+
         // Wait for the game to start
         waitForStart();
 
         while (opModeIsActive()) {
             // Step 1: Move forward to detect blocks
-            moveForward(0.5, 1500);
 
             // Step 2: Detect the color of the block
             if (isRedBlock()) {
@@ -130,8 +131,8 @@ public class PathfindingBlockPlacement extends LinearOpMode {
                 moveToBasket(-72, -72); // We are red
             } else {
                 telemetry.addLine("No valid block detected. Stopping...");
-                stopAllMotors();
-                return;
+                moveForward(0.5, 10)
+                continue;
             }
 
             // Step 3: Pick up the block
@@ -139,6 +140,8 @@ public class PathfindingBlockPlacement extends LinearOpMode {
 
             // Step 4: Drop block in the basket
             dropBlockInBasket();
+
+            sleep(1000);
 
             // Step 5: Reset robot position
             resetArmPosition();
@@ -151,11 +154,8 @@ public class PathfindingBlockPlacement extends LinearOpMode {
 
     // Helper functions
 
-    private void moveForward(double power, long duration) {
-        leftDrive.setPower(power);
-        rightDrive.setPower(power);
-        sleep(duration);
-        stopAllMotors();
+    private void moveForward(double power, double distance) {
+        robotUtils.driveStraight(this, distance);
     }
 
     private void moveBackward(double power, long duration) {
@@ -176,36 +176,36 @@ public class PathfindingBlockPlacement extends LinearOpMode {
         telemetry.addLine("Navigating to Basket...");
         telemetry.update();
 
-        // Navigate around the central obstacle
-        if (basketY > OBSTACLE_HEIGHT / 2) {
-            // If basket is beyond the obstacle, go around the top
-            moveForward(0.5, 1000); // Adjust timing
-            turnLeft(90);
-            moveForward(0.5, 1000); // Adjust timing
-        } else {
-            // If basket is below the obstacle, go around the bottom
-            moveForward(0.5, 1000); // Adjust timing
-            turnRight(90);
-            moveForward(0.5, 1000); // Adjust timing
-        }
+        // // Navigate around the central obstacle
+        // if (basketY > OBSTACLE_HEIGHT / 2) {
+        //     // If basket is beyond the obstacle, go around the top
+        //     moveForward(0.5, 1000); // Adjust timing
+        //     turnLeft(90);
+        //     moveForward(0.5, 1000); // Adjust timing
+        // } else {
+        //     // If basket is below the obstacle, go around the bottom
+        //     moveForward(0.5, 1000); // Adjust timing
+        //     turnRight(90);
+        //     moveForward(0.5, 1000); // Adjust timing
+        // }
 
         telemetry.addLine("Reached Basket Area.");
         telemetry.update();
     }
 
     private void pickUpBlock() {
-        intake.setPower(1.0); // Start the intake to pick up the block
+        intake.setPower(INTAKE_COLLECT); // Start the intake to pick up the block
         while (colorSensor.red() > 0 || colorSensor.blue() > 0 || colorSensor.green() > 0) {
             // Wait until the block is no longer sensed (indicating it's picked up)
             telemetry.addLine("Picking up block...");
             telemetry.update();
         }
-        intake.setPower(0); // Stop the intake
+        intake.setPower(INTAKE_OFF); // Stop the intake
         liftArm(); // Lift the block for transport
     }
 
     private void liftArm() {
-        armMotor.setTargetPosition(500); // Adjust based on arm's vertical position for baskets
+        armMotor.setTargetPosition(ARM_SCORE_SAMPLE_IN_LOW); // Adjust based on arm's vertical position for baskets
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         armMotor.setVelocity(2100);
         while (armMotor.isBusy()) {
@@ -214,8 +214,8 @@ public class PathfindingBlockPlacement extends LinearOpMode {
     }
 
     private void dropBlockInBasket() {
-        wrist.setPosition(0.0); // Adjust wrist to drop position
-        sleep(500);
+        wrist.setPosition(WRIST_FOLDED_OUT); // Adjust wrist to drop position
+        intake.setPower(INTAKE_DEPOSIT);
     }
 
     private void resetArmPosition() {
