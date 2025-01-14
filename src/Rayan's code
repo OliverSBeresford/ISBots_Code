@@ -227,16 +227,30 @@ public class PathfindingBlockPlacement extends LinearOpMode {
         }
     }
 
+    private static final int colorThreshold = 100; // Minimum color value for a block to be detected
+
+    private boolean isBlockPresent() {
+        return (colorSensor.red() > colorThreshold || 
+                colorSensor.blue() > colorThreshold || 
+                colorSensor.green() > colorThreshold);
+    }
+    
     private boolean isRedBlock() {
-        return colorSensor.red() > colorSensor.blue() && colorSensor.red() > colorSensor.green();
+        return isBlockPresent() && 
+               colorSensor.red() > colorSensor.blue() && 
+               colorSensor.red() > colorSensor.green();
     }
-
+    
     private boolean isBlueBlock() {
-        return colorSensor.blue() > colorSensor.red() && colorSensor.blue() > colorSensor.green();
+        return isBlockPresent() && 
+               colorSensor.blue() > colorSensor.red() && 
+               colorSensor.blue() > colorSensor.green();
     }
-
+    
     private boolean isYellowBlock() {
-        return colorSensor.green() > colorSensor.red() && colorSensor.green() > colorSensor.blue();
+        return isBlockPresent() && 
+               colorSensor.green() > colorSensor.red() && 
+               colorSensor.green() > colorSensor.blue();
     }
 
     private void turnLeft(int degrees) {
