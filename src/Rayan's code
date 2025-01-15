@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
-import org.firstinspires.ftc.teamcode.utils.RobotUtils;
+import org.firstinspires.ftc.teamcode.RobotUtils;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -97,7 +100,7 @@ public class Put extends LinearOpMode {
         /* Before starting the armMotor. We'll make sure the TargetPosition is set to 0.
         Then we'll set the RunMode to RUN_TO_POSITION. And we'll ask it to stop and reset encoder.
         If you do not have the encoder plugged into this motor, it will not run in this code. */
-        armMotor.setTargetPosition(ARM_COLLECT);
+        armMotor.setTargetPosition((int) ARM_COLLECT);
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -121,10 +124,7 @@ public class Put extends LinearOpMode {
         wristPosition = WRIST_FOLDED_OUT;
 
         while (opModeIsActive()) {
-            leftMotor.setPower(0.1);
-            rightMotor.setPower(0.1);
-
-            armMotor.setTargetPosition(ARM_COLLECT);
+            armMotor.setTargetPosition((int) ARM_COLLECT);
 
             ((DcMotorEx) armMotor).setVelocity(2100);
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -135,16 +135,17 @@ public class Put extends LinearOpMode {
             // Step 2: Detect the color of the block
             if (isRedBlock()) {
                 telemetry.addLine("Red block detected!");
-                moveToBasket(-72, -72); // We are red
+                // moveToBasket(-72, -72); // We are red
             } else if (isBlueBlock()) {
                 telemetry.addLine("Blue block detected!");
-                moveToBasket(72, 72); // Moving to the other basket, but in practice we would just leave it if we are the red team
+                // moveToBasket(72, 72); // Moving to the other basket, but in practice we would just leave it if we are the red team
             } else if (isYellowBlock()) {
                 telemetry.addLine("Yellow block detected!");
-                moveToBasket(-72, -72); // We are red
+                // moveToBasket(-72, -72); // We are red
             } else {
                 telemetry.addLine("No valid block detected. Stopping...");
-                moveForward(0.5, 10)
+                leftDrive.setPower(0.1);
+                rightDrive.setPower(0.1);
                 continue;
             }
 
@@ -168,7 +169,7 @@ public class Put extends LinearOpMode {
     // Helper functions
 
     private void moveForward(double power, double distance) {
-        robotUtils.driveStraight(this, distance);
+        robotUtils.driveStraight(this, distance, power, distance);
     }
 
     private void moveBackward(double power, long duration) {
@@ -218,7 +219,7 @@ public class Put extends LinearOpMode {
     }
 
     private void liftArm() {
-        armMotor.setTargetPosition(ARM_SCORE_SAMPLE_IN_LOW); // Adjust based on arm's vertical position for baskets
+        armMotor.setTargetPosition((int) ARM_SCORE_SAMPLE_IN_LOW); // Adjust based on arm's vertical position for baskets
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         armMotor.setVelocity(2100);
         while (armMotor.isBusy()) {
@@ -264,17 +265,17 @@ public class Put extends LinearOpMode {
                colorSensor.green() > colorSensor.blue();
     }
 
-    private void turnLeft(int degrees) {
+    private void turnLeft(double degrees) {
         // Use the turnDegrees function to turn left using the IMU
-        RobotUtils.turnDegrees(leftDrive, rightDrive, imu, -(degrees));
+        robotUtils.turnDegrees(this, degrees);
         telemetry.addData("Turning left", "%d degrees", degrees);
         telemetry.update();
         sleep(10); // Placeholder
     }
 
-    private void turnRight(int degrees) {
+    private void turnRight(double degrees) {
         // Use the turnDegrees function to turn right using the IMU
-        RobotUtils.turnDegrees(leftDrive, rightDrive, imu, degrees);
+        robotUtils.turnDegrees(this, degrees);
         telemetry.addData("Turning right", "%d degrees", degrees);
         telemetry.update();
         sleep(10); // Placeholder
