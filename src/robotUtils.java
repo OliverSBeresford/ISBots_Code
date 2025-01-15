@@ -75,7 +75,7 @@ public class RobotUtils {
 
     // Method to drive straight for a specific distance
     public void driveStraight(LinearOpMode opMode, double distanceInInches, double power, double targetHeading) {
-        int ticksPerRevolution = ((((1 + (46 / 17))) * (1 + (46 / 11))) * 28); // Example for a typical motor
+        int ticksPerRevolution = ((((1 + (46 / 17))) * (1 + (46 / 11))) * 28); // Got this from GOBilda
         double wheelDiameter = 3.77953; // In inches
         double wheelCircumference = Math.PI * wheelDiameter;
         int targetTicks = (int) ((distanceInInches / wheelCircumference) * ticksPerRevolution);
