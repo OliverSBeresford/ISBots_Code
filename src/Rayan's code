@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
 @Autonomous(name = "Pathfinding & Block Placement", group = "Linear Opmode")
-public class PathfindingBlockPlacement extends LinearOpMode {
+public class Put extends LinearOpMode {
 
     // Hardware components
     private DcMotor leftDrive;
