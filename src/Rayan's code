@@ -69,12 +69,14 @@ public class Put extends LinearOpMode {
     final double WRIST_FOLDED_OUT  = 0.5;
     final double WRIST_FOLDED_LEFT = 0.1667;
 
-    /* A number in degrees that the triggers can adjust the arm position by */
-    final double FUDGE_FACTOR = 15 * ARM_TICKS_PER_DEGREE;
+    // Values for detecting blocks
+    private static final int[] RED_RGB = {100, 80, 60};
+    private static final int[] BLUE_RGB = {50, 50, 200};
+    private static final int[] YELLOW_RGB = {200, 200, 50};
+    private static final int TOLERANCE = 10;
 
     /* Variables that are used to set the arm to a specific position */
     double armPosition = (int) ARM_COLLAPSED_INTO_ROBOT;
-    double armPositionFudgeFactor;
     private IMU imu;
 
     @Override
@@ -237,29 +239,25 @@ public class Put extends LinearOpMode {
         }
     }
 
-    private boolean isBlockPresent() {
-        return (colorSensor.red() > colorThreshold || 
-                colorSensor.blue() > colorThreshold || 
-                colorSensor.green() > colorThreshold);
-    }
-    
     private boolean isRedBlock() {
-        return isBlockPresent() && 
-               colorSensor.red() > colorSensor.blue() && 
-               colorSensor.red() > colorSensor.green();
+        return isBlockPresent() &&
+               isWithinRange(colorSensor.red(), RED_RGB[0], TOLERANCE) &&
+               isWithinRange(colorSensor.green(), RED_RGB[1], TOLERANCE) &&
+               isWithinRange(colorSensor.blue(), RED_RGB[2], TOLERANCE);
     }
     
     private boolean isBlueBlock() {
-        return isBlockPresent() && 
-               colorSensor.blue() > colorSensor.red() && 
-               colorSensor.blue() > colorSensor.green();
+        return isBlockPresent() &&
+               isWithinRange(colorSensor.red(), BLUE_RGB[0], TOLERANCE) &&
+               isWithinRange(colorSensor.green(), BLUE_RGB[1], TOLERANCE) &&
+               isWithinRange(colorSensor.blue(), BLUE_RGB[2], TOLERANCE);
     }
     
     private boolean isYellowBlock() {
-        return isBlockPresent() && 
-               colorSensor.red() > colorThreshold &&
-               colorSensor.green() > colorThreshold &&
-               colorSensor.blue() < colorThreshold;
+        return isBlockPresent() &&
+               isWithinRange(colorSensor.red(), YELLOW_RGB[0], TOLERANCE) &&
+               isWithinRange(colorSensor.green(), YELLOW_RGB[1], TOLERANCE) &&
+               isWithinRange(colorSensor.blue(), YELLOW_RGB[2], TOLERANCE);
     }
 
     private void turnLeft(double degrees) {
@@ -276,6 +274,10 @@ public class Put extends LinearOpMode {
         telemetry.addData("Turning right", "%d degrees", degrees);
         telemetry.update();
         sleep(10); // Placeholder
+    }
+
+    private boolean isWithinRange(int actual, int target, int tolerance) {
+        return Math.abs(actual - target) <= tolerance;
     }
 
 }
