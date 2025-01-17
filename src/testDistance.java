@@ -168,7 +168,8 @@ public class TestDistance extends LinearOpMode {
         /* Wait for the game driver to press play */
         waitForStart();
 
-        robotUtils = new RobotUtils(leftDrive, rightDrive, imu);
+        robotUtils = new RobotUtils();
+        robotUtils.setHardware(leftDrive, rightDrive, imu);
 
         /* Run until the driver presses stop */
         while (opModeIsActive()) {
