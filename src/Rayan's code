@@ -22,7 +22,7 @@ public class Put extends LinearOpMode {
     private CRServo intake;
     private ColorSensor colorSensor;
     private RobotUtils robotUtils;
-    private static final int colorThreshold = 50; // Minimum color value for a block to be detected
+    private static final int colorThreshold = 100; // Minimum color value for a block to be detected
 
     // Field dimensions and obstacle location
     private static final double FIELD_SIZE = 144.0; // 144 inches (12x12 ft field)
@@ -101,7 +101,7 @@ public class Put extends LinearOpMode {
         /* Before starting the armMotor. We'll make sure the TargetPosition is set to 0.
         Then we'll set the RunMode to RUN_TO_POSITION. And we'll ask it to stop and reset encoder.
         If you do not have the encoder plugged into this motor, it will not run in this code. */
-        armMotor.setTargetPosition((int) ARM_COLLECT);
+        armMotor.setTargetPosition((int) ARM_CLEAR_BARRIER);
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -121,48 +121,47 @@ public class Put extends LinearOpMode {
         // Wait for the game to start
         waitForStart();
 
-        armPosition = (int) ARM_COLLECT;
+        armPosition = (int) ARM_CLEAR_BARRIER;
         wristPosition = WRIST_FOLDED_OUT;
 
         while (opModeIsActive()) {
-            armMotor.setTargetPosition((int) ARM_COLLECT);
-
-            ((DcMotorEx) armMotor).setVelocity(2100);
-            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
             /* Changing the wrist's position */
             wrist.setPosition(wristPosition);
+            
+            // Move the arm to the correct position
+            moveArm((int) armPosition);
 
             // Step 2: Detect the color of the block
-            if (isRedBlock()) {
+            if (isYellowBlock()) {
                 telemetry.addLine("Red block detected!");
                 // moveToBasket(-72, -72); // We are red
             } else if (isBlueBlock()) {
                 telemetry.addLine("Blue block detected!");
                 // moveToBasket(72, 72); // Moving to the other basket, but in practice we would just leave it if we are the red team
-            } else if (isYellowBlock()) {
+            } else if (isRedBlock()) {
                 telemetry.addLine("Yellow block detected!");
                 // moveToBasket(-72, -72); // We are red
             } else {
                 telemetry.addLine("Red: " + colorSensor.red() + " Green: " + colorSensor.green() + " Blue: " + colorSensor.blue());
+                telemetry.update();
                 leftDrive.setPower(0.1);
                 rightDrive.setPower(0.1);
                 continue;
             }
 
-            // Step 3: Pick up the block
-            pickUpBlock();
+            // // Step 3: Pick up the block
+            // pickUpBlock();
 
-            // Step 4: Drop block in the basket
-            dropBlockInBasket();
+            // // Step 4: Drop block in the basket
+            // dropBlockInBasket();
 
-            sleep(1000);
+            // sleep(1000);
 
-            // Step 5: Reset robot position
-            resetArmPosition();
-            moveBackward(0.5, 1000);
+            // // Step 5: Reset robot position
+            // resetArmPosition();
+            // moveBackward(0.5, 1000);
 
-            telemetry.addLine("Task Complete.");
+            // telemetry.addLine("Task Complete.");
             telemetry.update();
         }
     }
@@ -210,17 +209,13 @@ public class Put extends LinearOpMode {
 
     private void pickUpBlock() {
         intake.setPower(INTAKE_COLLECT); // Start the intake to pick up the block
-        while ((colorSensor.red() > 0 || colorSensor.blue() > 0 || colorSensor.green() > 0) && opModeIsActive()){
-            // Wait until the block is no longer sensed (indicating it's picked up)
-            telemetry.addLine("Picking up block...");
-            telemetry.update();
-        }
+        sleep(1000);
         intake.setPower(INTAKE_OFF); // Stop the intake
-        liftArm(); // Lift the block for transport
+        moveArm((int) ARM_SCORE_SAMPLE_IN_LOW); // Lift the block for transport
     }
 
-    private void liftArm() {
-        armMotor.setTargetPosition((int) ARM_SCORE_SAMPLE_IN_LOW); // Adjust based on arm's vertical position for baskets
+    private void moveArm(int position) {
+        armMotor.setTargetPosition(position); // Adjust based on arm's vertical position for baskets
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         armMotor.setVelocity(2100);
         while (armMotor.isBusy() && opModeIsActive()) {
@@ -262,8 +257,9 @@ public class Put extends LinearOpMode {
     
     private boolean isYellowBlock() {
         return isBlockPresent() && 
-               colorSensor.green() > colorSensor.red() && 
-               colorSensor.green() > colorSensor.blue();
+               colorSensor.red() > colorThreshold &&
+               colorSensor.green() > colorThreshold &&
+               colorSensor.blue() < colorThreshold;
     }
 
     private void turnLeft(double degrees) {
