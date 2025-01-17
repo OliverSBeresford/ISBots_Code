@@ -24,8 +24,8 @@ public class RobotUtils {
     private DcMotor rightDrive;
     private IMU imu;
 
-    // Constructor to initialize hardware
-    public RobotUtils(DcMotor _leftDrive, DcMotor _rightDrive, IMU _imu) {
+    // Metho to initialize hardware
+    public void setHardware(DcMotor _leftDrive, DcMotor _rightDrive, IMU _imu) {
         leftDrive = _leftDrive;
         rightDrive = _rightDrive;
         imu = _imu;
@@ -33,6 +33,11 @@ public class RobotUtils {
 
     // Method to turn the robot by a specific angle
     public void turnDegrees(LinearOpMode opMode, double turnAngle) {
+        // Making sure hardware is initialized
+        if (leftDrive == null || rightDrive == null || imu == null) {
+            return;
+        }
+
         double currentAngle;
         double error;
         double turnPower;
@@ -87,6 +92,11 @@ public class RobotUtils {
 
     // Method to drive straight for a specific distance
     public void driveStraight(LinearOpMode opMode, double distanceInInches, double power, double targetHeading) {
+        // Making sure hardware is initialized
+        if (leftDrive == null || rightDrive == null || imu == null) {
+            return;
+        }
+
         int ticksPerRevolution = ((((1 + (46 / 17))) * (1 + (46 / 11))) * 28); // Got this from GOBilda
         double wheelDiameter = 3.77953; // In inches
         double wheelCircumference = Math.PI * wheelDiameter;
