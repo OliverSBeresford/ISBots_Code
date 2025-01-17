@@ -22,7 +22,7 @@ public class Put extends LinearOpMode {
     private CRServo intake;
     private ColorSensor colorSensor;
     private RobotUtils robotUtils;
-    private static final int colorThreshold = 100; // Minimum color value for a block to be detected
+    private static final int colorThreshold = 85; // Minimum color value for a block to be detected
 
     // Field dimensions and obstacle location
     private static final double FIELD_SIZE = 144.0; // 144 inches (12x12 ft field)
@@ -52,6 +52,7 @@ public class Put extends LinearOpMode {
 
     final double ARM_COLLAPSED_INTO_ROBOT  = 0;
     final double ARM_COLLECT               = 250 * ARM_TICKS_PER_DEGREE;
+    final double ARM_SEARCH                = 245 * ARM_TICKS_PER_DEGREE;
     final double ARM_CLEAR_BARRIER         = 230 * ARM_TICKS_PER_DEGREE;
     final double ARM_SCORE_SPECIMEN        = 160 * ARM_TICKS_PER_DEGREE;
     final double ARM_SCORE_SAMPLE_IN_LOW   = 160 * ARM_TICKS_PER_DEGREE;
@@ -72,7 +73,7 @@ public class Put extends LinearOpMode {
     final double FUDGE_FACTOR = 15 * ARM_TICKS_PER_DEGREE;
 
     /* Variables that are used to set the arm to a specific position */
-    double armPosition = (int)ARM_COLLAPSED_INTO_ROBOT;
+    double armPosition = (int) ARM_COLLAPSED_INTO_ROBOT;
     double armPositionFudgeFactor;
     private IMU imu;
 
@@ -101,7 +102,7 @@ public class Put extends LinearOpMode {
         /* Before starting the armMotor. We'll make sure the TargetPosition is set to 0.
         Then we'll set the RunMode to RUN_TO_POSITION. And we'll ask it to stop and reset encoder.
         If you do not have the encoder plugged into this motor, it will not run in this code. */
-        armMotor.setTargetPosition((int) ARM_CLEAR_BARRIER);
+        armMotor.setTargetPosition(0);
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -121,7 +122,7 @@ public class Put extends LinearOpMode {
         // Wait for the game to start
         waitForStart();
 
-        armPosition = (int) ARM_CLEAR_BARRIER;
+        armPosition = (int) ARM_SEARCH;
         wristPosition = WRIST_FOLDED_OUT;
 
         while (opModeIsActive()) {
@@ -141,13 +142,12 @@ public class Put extends LinearOpMode {
             } else if (isRedBlock()) {
                 telemetry.addLine("Yellow block detected!");
                 // moveToBasket(-72, -72); // We are red
-            } else {
-                telemetry.addLine("Red: " + colorSensor.red() + " Green: " + colorSensor.green() + " Blue: " + colorSensor.blue());
-                telemetry.update();
-                leftDrive.setPower(0.1);
-                rightDrive.setPower(0.1);
-                continue;
             }
+            
+            telemetry.addLine("Red: " + colorSensor.red() + " Green: " + colorSensor.green() + " Blue: " + colorSensor.blue());
+            telemetry.update();
+            leftDrive.setPower(0);
+            rightDrive.setPower(0);
 
             // // Step 3: Pick up the block
             // pickUpBlock();
@@ -279,3 +279,4 @@ public class Put extends LinearOpMode {
     }
 
 }
+
