@@ -22,7 +22,7 @@ public class Put extends LinearOpMode {
     private CRServo intake;
     private ColorSensor colorSensor;
     private RobotUtils robotUtils;
-    private static final int colorThreshold = 100; // Minimum color value for a block to be detected
+    private static final int colorThreshold = 50; // Minimum color value for a block to be detected
 
     // Field dimensions and obstacle location
     private static final double FIELD_SIZE = 144.0; // 144 inches (12x12 ft field)
@@ -79,7 +79,7 @@ public class Put extends LinearOpMode {
     @Override
     public void runOpMode() {
         // Create variables that we will use
-        double wristPosition = WRIST_FOLDED_LEFT;
+        double wristPosition = WRIST_FOLDED_IN;
         double intakePower = INTAKE_OFF;
 
         // Initialize hardware
@@ -210,7 +210,7 @@ public class Put extends LinearOpMode {
 
     private void pickUpBlock() {
         intake.setPower(INTAKE_COLLECT); // Start the intake to pick up the block
-        while (colorSensor.red() > 0 || colorSensor.blue() > 0 || colorSensor.green() > 0) {
+        while ((colorSensor.red() > 0 || colorSensor.blue() > 0 || colorSensor.green() > 0) && opModeIsActive()){
             // Wait until the block is no longer sensed (indicating it's picked up)
             telemetry.addLine("Picking up block...");
             telemetry.update();
@@ -223,7 +223,7 @@ public class Put extends LinearOpMode {
         armMotor.setTargetPosition((int) ARM_SCORE_SAMPLE_IN_LOW); // Adjust based on arm's vertical position for baskets
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         armMotor.setVelocity(2100);
-        while (armMotor.isBusy()) {
+        while (armMotor.isBusy() && opModeIsActive()) {
             // Wait for the arm to reach the position
         }
     }
@@ -237,7 +237,7 @@ public class Put extends LinearOpMode {
         armMotor.setTargetPosition(0); // Return the arm to starting position
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         armMotor.setVelocity(2100);
-        while (armMotor.isBusy()) {
+        while (armMotor.isBusy() && opModeIsActive()) {
             // Wait for the arm to reset
         }
     }
