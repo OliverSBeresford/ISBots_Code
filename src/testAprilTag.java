@@ -22,6 +22,7 @@ public class testAprilTag extends LinearOpMode {
     Position cameraPosition;
     YawPitchRollAngles cameraOrientation;
     VisionPortal myVisionPortal;
+    RobotUtils robotUtils;
 
     /**
      * This OpMode illustrates the basics of AprilTag based localization.
@@ -45,30 +46,15 @@ public class testAprilTag extends LinearOpMode {
     @Override
     public void runOpMode() {
         USE_WEBCAM = true;
-        // Variables to store the position and orientation of the camera on the robot. Setting these
-        // values requires a definition of the axes of the camera and robot:
-        // Camera axes:
-        // Origin location: Center of the lens
-        // Axes orientation: +x right, +y down, +z forward (from camera's perspective)
-        // Robot axes (this is typical, but you can define this however you want):
-        // Origin location: Center of the robot at field height
-        // Axes orientation: +x right, +y forward, +z upward
-        // Position:
-        // If all values are zero (no translation), that implies the camera is at the center of the
-        // robot. Suppose your camera is positioned 5 inches to the left, 7 inches forward, and 12
-        // inches above the ground - you would need to set the position to (-5, 7, 12).
-        // Orientation:
-        // If all values are zero (no rotation), that implies the camera is pointing straight up. In
-        // most cases, you'll need to set the pitch to -90 degrees (rotation about the x-axis), meaning
-        // the camera is horizontal. Use a yaw of 0 if the camera is pointing forwards, +90 degrees if
-        // it's pointing straight left, -90 degrees for straight right, etc. You can also set the roll
-        // to +/-90 degrees if it's vertical, or 180 degrees if it's upside-down.
-        // Position(DistanceUnit unit, double x, double y, double z, long acquisitionTime)
-        cameraPosition = new Position(DistanceUnit.CM, 5, 21.5, 18, 0);
-        // YawPitchRollAngles(AngleUnit angleUnit, double yaw, double pitch, double roll, long acquisitionTime)
-        cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 0, -90, 0, 0);
-        // Initialize AprilTag before waitForStart.
-        initAprilTag();
+
+        // Initialize the robot utilities.
+        robotUtils = new RobotUtils();
+        
+        // Initialize the apriltag processor.
+        robotUtils.VisionComponents visionComponents = robotUtils.initAprilTag();
+        myVisionPortal = visionComponents.visionPortal;
+        myAprilTagProcessor = visionComponents.aprilTagProcessor;
+
         // Wait for the match to begin.
         telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
         telemetry.addData(">", "Touch START to start OpMode");
@@ -89,34 +75,6 @@ public class testAprilTag extends LinearOpMode {
             // Share the CPU.
             sleep(20);
         }
-    }
-
-    /**
-     * Initialize AprilTag Detection.
-     */
-    private void initAprilTag() {
-        AprilTagProcessor.Builder myAprilTagProcessorBuilder;
-        VisionPortal.Builder myVisionPortalBuilder;
-
-        // First, create an AprilTagProcessor.Builder.
-        myAprilTagProcessorBuilder = new AprilTagProcessor.Builder();
-        myAprilTagProcessorBuilder.setCameraPose(cameraPosition, cameraOrientation);
-        // Create an AprilTagProcessor by calling build.
-        // Create the AprilTag processor and assign it to a variable.
-        myAprilTagProcessor = myAprilTagProcessorBuilder.build();
-        // Next, create a VisionPortal.Builder and set attributes related to the camera.
-        myVisionPortalBuilder = new VisionPortal.Builder();
-        if (USE_WEBCAM) {
-            // Use a webcam.
-            myVisionPortalBuilder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
-        } else {
-            // Use the device's back camera.
-            myVisionPortalBuilder.setCamera(BuiltinCameraDirection.BACK);
-        }
-        // Add myAprilTagProcessor to the VisionPortal.Builder.
-        myVisionPortalBuilder.addProcessor(myAprilTagProcessor);
-        // Create a VisionPortal by calling build.
-        myVisionPortal = myVisionPortalBuilder.build();
     }
 
     /**
