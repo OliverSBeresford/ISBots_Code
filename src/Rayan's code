@@ -144,7 +144,7 @@ public class Put extends LinearOpMode {
                 telemetry.addLine("Yellow block detected!");
                 // moveToBasket(-72, -72); // We are red
             } else {
-                telemetry.addLine("No valid block detected. Stopping...");
+                telemetry.addLine("Red: " + colorSensor.red() + " Green: " + colorSensor.green() + " Blue: " + colorSensor.blue());
                 leftDrive.setPower(0.1);
                 rightDrive.setPower(0.1);
                 continue;
