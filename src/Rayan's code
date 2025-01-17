@@ -239,6 +239,10 @@ public class Put extends LinearOpMode {
         }
     }
 
+    private boolean isBlockPresent() {
+        return (colorSensor.red() > colorThreshold || colorSensor.green() > colorThreshold || colorSensor.blue() > colorThreshold);
+    }
+
     private boolean isRedBlock() {
         return isBlockPresent() &&
                isWithinRange(colorSensor.red(), RED_RGB[0], TOLERANCE) &&
