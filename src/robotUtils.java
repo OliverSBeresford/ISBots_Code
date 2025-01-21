@@ -25,6 +25,22 @@ public class RobotUtils {
     private CRServo intake = null;
     private Servo wrist = null;
     private DCMotorEx armMotor = null;
+    private AprilTagProcessor aprilTagProcessor = null;
+    private VisionPortal visionPortal = null;
+
+    // Define the 6x6 grid. 1 = obstacle, 0 = traversable
+    private static final int[][] FIELD = {
+        {0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 1},
+        {0, 0, 1, 1, 0, 0},
+        {0, 0, 1, 1, 0, 0},
+        {1, 0, 0, 0, 0, 1},
+        {0, 0, 0, 0, 0, 0}
+    };
+
+    // Grid dimensions
+    private static final int GRID_SIZE = 6;
+    private static final double CELL_SIZE = 24.0; // Inches
 
     /* These are the various functions to initialize whatever parts of the RobotUtils class you need
      * 
@@ -161,6 +177,160 @@ public class RobotUtils {
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
+    private void moveArm(LinearOpMode opMode, int position) {
+        /* This function moves the arm to a specific position
+         * Parameters: int position - The position to move the arm to.
+         */
+        
+        // Making sure hardware is initialized
+        if (armMotor == null) {
+            return;
+        }
+
+        armMotor.setTargetPosition(position); // Adjust based on arm's vertical position for baskets
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setVelocity(2100);
+        while (armMotor.isBusy() && opMode.opModeIsActive()) {
+            // Wait for the arm to reach the position
+        }
+    }
+
+    public void moveToBlueBasket(LinearOpMode opMode, int armPosition) {
+        /* This function moves the robot to the blue basket
+         * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
+         */
+
+        // Making sure hardware is initialized
+        if (leftDrive == null || rightDrive == null || imu == null || intake == null || wrist == null || armMotor == null || aprilTagProcessor == null || visionPortal == null) {
+            return;
+        }
+
+        Pose3D currentPose;
+
+        currentPose = getData(opMode, aprilTagProcessor, false);
+
+        // Drive to the blue basket
+        // Convert field coordinates to grid indices
+        int[] start = fieldToGrid(poseData.getPosition().x, poseData.getPosition().y);
+        int[] target = fieldToGrid(60, 60);
+
+        // Perform A* pathfinding
+        List<int[]> path = aStar(FIELD, start, target);
+
+        if (path == null) {
+            opMode.telemetry.addData("Error", "No path found.");
+            opMode.telemetry.update();
+            return;
+        }
+
+        // Follow the path
+        for (int i = 1; i < path.size(); i++) {
+            int[] current = path.get(i - 1);
+            int[] next = path.get(i);
+
+            // Calculate direction and distance
+            double[] currentField = {currentPose.getPosition().x, currentPose.getPosition().y};
+            double[] nextField = gridToField(next[0], next[1]);
+
+            double dx = nextField[0] - currentField[0];
+            double dy = nextField[1] - currentField[1];
+            double distance = Math.hypot(dx, dy);
+            double targetHeading = Math.toDegrees(Math.atan2(dy, dx));
+
+            // Turn and move
+            turnToHeading(opMode, imu, targetHeading);
+            driveStraight(opMode, distance, 0.5, targetHeading);
+
+            // Correct position periodically
+            currentPose = getData(opMode, aprilTagProcessor, false);
+            opMode.telemetry.addData("Position", currentPose.getPosition());
+            opMode.telemetry.addData("Heading", currentPose.getOrientation());
+            opMode.telemetry.update();
+        }
+    }
+
+    private static void turnToHeading(LinearOpMode opMode, IMU imu, double targetHeading) {
+        double currentHeading = imu.getYaw();
+        double turnAngle = targetHeading - currentHeading;
+
+        if (turnAngle > 180) turnAngle -= 360;
+        if (turnAngle < -180) turnAngle += 360;
+
+        turnDegrees(opMode, turnAngle);
+    }
+
+    private static int[] fieldToGrid(double x, double y) {
+        // Assuming the bottom left corner corresponds to the coordinates (-72, -72)
+        int col = (int) Math.floor((x + 72) / CELL_SIZE);
+        int row = (int) Math.floor((144 - (y + 72)) / CELL_SIZE);
+        return new int[]{row, col};
+    }
+
+    private static double[] gridToField(int row, int col) {
+        double x = (col - 3) * CELL_SIZE + CELL_SIZE / 2;
+        double y = (3 - row) * CELL_SIZE - CELL_SIZE / 2;
+        return new double[]{x, y};
+    }
+
+    private static List<int[]> aStar(int[][] grid, int[] start, int[] goal) {
+        PriorityQueue<Node> openSet = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fCost));
+        Set<String> closedSet = new HashSet<>();
+        openSet.add(new Node(start, null, 0, heuristic(start, goal)));
+
+        while (!openSet.isEmpty()) {
+            Node current = openSet.poll();
+            int[] pos = current.position;
+
+            if (Arrays.equals(pos, goal)) return reconstructPath(current);
+
+            closedSet.add(Arrays.toString(pos));
+
+            for (int[] dir : new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}}) {
+                int[] neighbor = {pos[0] + dir[0], pos[1] + dir[1]};
+
+                if (isValid(neighbor, grid) && !closedSet.contains(Arrays.toString(neighbor))) {
+                    double gCost = current.gCost + 1;
+                    double hCost = heuristic(neighbor, goal);
+                    openSet.add(new Node(neighbor, current, gCost, gCost + hCost));
+                }
+            }
+        }
+
+        return null; // No path found
+    }
+
+    private static boolean isValid(int[] pos, int[][] grid) {
+        int row = pos[0], col = pos[1];
+        return row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE && grid[row][col] == 0;
+    }
+
+    private static double heuristic(int[] a, int[] b) {
+        return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
+    }
+
+    private static List<int[]> reconstructPath(Node node) {
+        List<int[]> path = new ArrayList<>();
+        while (node != null) {
+            path.add(node.position);
+            node = node.parent;
+        }
+        Collections.reverse(path);
+        return path;
+    }
+
+    private static class Node {
+        int[] position;
+        Node parent;
+        double gCost, fCost;
+
+        Node(int[] position, Node parent, double gCost, double fCost) {
+            this.position = position;
+            this.parent = parent;
+            this.gCost = gCost;
+            this.fCost = fCost;
+        }
+    }
+
     /* These functions relate to the AprilTag detection system. 
      * 
     */
@@ -207,6 +377,10 @@ public class RobotUtils {
         myVisionPortalBuilder.addProcessor(myAprilTagProcessor);
         // Create a VisionPortal by calling build.
         VisionPortal myVisionPortal = myVisionPortalBuilder.build();
+
+        // Assign the AprilTagProcessor and VisionPortal to the class variables.
+        aprilTagProcessor = myAprilTagProcessor;
+        visionPortal = myVisionPortal;
         
         return new VisionComponents(myVisionPortal, myAprilTagProcessor);
     }
