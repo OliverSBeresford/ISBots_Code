@@ -4,16 +4,17 @@ import java.util.List;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -195,6 +196,52 @@ public class RobotUtils {
         VisionPortal myVisionPortal = myVisionPortalBuilder.build();
         
         return new VisionComponents(myVisionPortal, myAprilTagProcessor);
+    }
+
+    public Pose3D getData(LinearOpMode opMode, AprilTagProcessor myAprilTagProcessor, bool debugEnabled) {
+        List<AprilTagDetection> myAprilTagDetections;
+        AprilTagDetection myAprilTagDetection;
+
+        // Get a list of AprilTag detections.
+        myAprilTagDetections = myAprilTagProcessor.getDetections();
+        // Display the number of AprilTags detected.
+        if (debugEnabled) {
+            opMode.telemetry.addData("# AprilTags Detected", JavaUtil.listLength(myAprilTagDetections));
+        }
+
+        // Iterate through list and call a function to return info for the first recognized AprilTag.
+        for (AprilTagDetection myAprilTagDetection_item : myAprilTagDetections) {
+            myAprilTagDetection = myAprilTagDetection_item;
+            // Display info about the detection.
+            if (myAprilTagDetection.metadata != null) {
+                // Return the data without printing it if debug is disabled
+                if (!debugEnabled) {
+                    return myAprilTagDetection.robotPose;
+                }
+
+                // Field-relative data
+                opMode.telemetry.addLine("==== (ID " + myAprilTagDetection.id + ") " + myAprilTagDetection.metadata.name);
+                opMode.telemetry.addLine("XYZ " + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getPosition().x, 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getPosition().y, 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getPosition().z, 6, 1) + "    (inch)");
+                opMode.telemetry.addLine("PRY " + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getOrientation().getPitch(), 6, 1) + "" + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getOrientation().getRoll(), 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getOrientation().getYaw(), 6, 1) + "    (deg)");
+                
+                // Raw data (relative to the apriltag)
+                opMode.telemetry.addLine("==== (ID " + myAprilTagDetection.id + ") " + myAprilTagDetection.metadata.name);
+                opMode.telemetry.addLine("XYZ (RAW) " + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getPosition().x, 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getPosition().y, 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getPosition().z, 6, 1) + "    (inch)");
+                opMode.telemetry.addLine("PRY (RAW) " + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getOrientation().getPitch(), 6, 1) + "" + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getOrientation().getRoll(), 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getOrientation().getYaw(), 6, 1) + "    (deg)");
+
+                // Useful information for debugging
+                opMode.telemetry.addLine("");
+                opMode.telemetry.addLine("key:");
+                opMode.telemetry.addLine("XYZ = X (Right), Y (Forward), Z (Up) dist.");
+                opMode.telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");
+
+                return myAprilTagDetection.robotPose;
+            } else {
+                opMode.telemetry.addLine("==== (ID " + myAprilTagDetection.id + ") Unknown");
+                opMode.telemetry.addLine("Center " + JavaUtil.formatNumber(myAprilTagDetection.center.x, 6, 0) + "" + JavaUtil.formatNumber(myAprilTagDetection.center.y, 6, 0) + " (pixels)");
+                return null;
+            }
+        }
     }
 
     /* Classes used to return specific data from the RobotUtils class */
