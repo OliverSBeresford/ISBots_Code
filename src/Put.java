@@ -22,7 +22,7 @@ public class Put extends LinearOpMode {
     private CRServo intake;
     private ColorSensor colorSensor;
     private RobotUtils robotUtils;
-    private static final int colorThreshold = 65; // Minimum color value for a block to be detected
+    private static final int colorThreshold = 500; // Minimum color value for a block to be detected
 
     // Field dimensions and obstacle location
     private static final double FIELD_SIZE = 144.0; // 144 inches (12x12 ft field)
