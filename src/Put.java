@@ -99,7 +99,7 @@ public class Put extends LinearOpMode {
 
         // Initialize the robot utility class to have access to useful methods
         robotUtils = new RobotUtils();
-        robotUtils.setHardware(leftDrive, rightDrive, imu);
+        robotUtils.setHardware(leftDrive, rightDrive, imu, intake, wrist, armMotor);
 
         // Set motor directions
         leftDrive.setDirection(DcMotor.Direction.FORWARD);

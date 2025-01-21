@@ -19,9 +19,12 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 public class RobotUtils {
 
-    private DcMotor leftDrive;
-    private DcMotor rightDrive;
-    private IMU imu;
+    private DcMotor leftDrive = null;
+    private DcMotor rightDrive = null;
+    private IMU imu = null;
+    private CRServo intake = null;
+    private Servo wrist = null;
+    private DCMotorEx armMotor = null;
 
     /* These are the various functions to initialize whatever parts of the RobotUtils class you need
      * 
@@ -29,11 +32,23 @@ public class RobotUtils {
      * Parameters: DcMotor _leftDrive - The left drive motor.
      *             DcMotor _rightDrive - The right drive motor.
      *             IMU _imu - The IMU sensor.
+     *             CRServo _intake - The intake servo.
+     *             Servo _wrist - The wrist servo.
+     *             DCMotorEx _armMotor - The arm motor.
      */
     public void setHardware(DcMotor _leftDrive, DcMotor _rightDrive, IMU _imu) {
         leftDrive = _leftDrive;
         rightDrive = _rightDrive;
         imu = _imu;
+    }
+
+    public void setHardware(DcMotor _leftDrive, DcMotor _rightDrive, IMU _imu, CRServo _intake, Servo _wrist, DCMotorEx _armMotor) {
+        leftDrive = _leftDrive;
+        rightDrive = _rightDrive;
+        imu = _imu;
+        intake = _intake;
+        wrist = _wrist;
+        armMotor = _armMotor;
     }
 
     /* These functions relate to physical behaior of the robot */
@@ -197,6 +212,13 @@ public class RobotUtils {
     }
 
     public Pose3D getData(LinearOpMode opMode, AprilTagProcessor myAprilTagProcessor, bool debugEnabled) {
+        /* This function returns pose data (i.e. the robot's position on the field) using an AprilTag Detection 
+         * 
+         * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
+         *             AprilTagProcessor myAprilTagProcessor - The AprilTagProcessor object that is used to detect AprilTags.
+         *             bool debugEnabled - Whether or not to print debug information.
+        */
+
         List<AprilTagDetection> myAprilTagDetections;
         AprilTagDetection myAprilTagDetection;
 
