@@ -70,9 +70,9 @@ public class Put extends LinearOpMode {
     final double WRIST_FOLDED_LEFT = 0.1667;
 
     // Values for detecting blocks
-    private static final int[] RED_RGB = {100, 80, 60};
-    private static final int[] BLUE_RGB = {50, 50, 200};
-    private static final int[] YELLOW_RGB = {200, 200, 50};
+    private static final int[] RED_RGB = {880, 430, 225};
+    private static final int[] BLUE_RGB = {160, 330, 780};
+    private static final int[] YELLOW_RGB = {1450, 1730, 400};
     private static final int TOLERANCE = 10;
 
     /* Variables that are used to set the arm to a specific position */
