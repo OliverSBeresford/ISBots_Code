@@ -24,15 +24,26 @@ public class RobotUtils {
     private DcMotor rightDrive;
     private IMU imu;
 
-    // Metho to initialize hardware
+    /* These are the various functions to initialize whatever parts of the RobotUtils class you need
+     * 
+     * setHardware: Initializes the hardware for the robot.
+     * Parameters: DcMotor _leftDrive - The left drive motor.
+     *             DcMotor _rightDrive - The right drive motor.
+     *             IMU _imu - The IMU sensor.
+     */
     public void setHardware(DcMotor _leftDrive, DcMotor _rightDrive, IMU _imu) {
         leftDrive = _leftDrive;
         rightDrive = _rightDrive;
         imu = _imu;
     }
 
-    // Method to turn the robot by a specific angle
+    /* These functions relate to physical behaior of the robot */
     public void turnDegrees(LinearOpMode opMode, double turnAngle) {
+        /* This function turn the robot a certain number of degrees
+         * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
+         *             double turnAngle - The number of degrees to turn the robot.
+         */
+
         // Making sure hardware is initialized
         if (leftDrive == null || rightDrive == null || imu == null) {
             return;
@@ -90,8 +101,14 @@ public class RobotUtils {
         rightDrive.setPower(0);
     }
 
-    // Method to drive straight for a specific distance
     public void driveStraight(LinearOpMode opMode, double distanceInInches, double power, double targetHeading) {
+        /* This function drives the robot a certain distance in inches
+         * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
+         *             double distanceInInches - The distance to drive the robot in inches.
+         *             double power - The power to drive the robot at (number from 0 to 1).
+         *             double targetHeading - The heading to drive the robot at.
+         */
+
         // Making sure hardware is initialized
         if (leftDrive == null || rightDrive == null || imu == null) {
             return;
@@ -130,9 +147,9 @@ public class RobotUtils {
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    /**
-     * Initialize AprilTag Detection.
-     */
+    /* These functions relate to the AprilTag detection system. 
+     * 
+    */
     public VisionComponents initAprilTag(LinearOpMode opMode) {
         // Variables to store the position and orientation of the camera on the robot. Setting these
         // values requires a definition of the axes of the camera and robot:
@@ -180,6 +197,7 @@ public class RobotUtils {
         return new VisionComponents(myVisionPortal, myAprilTagProcessor);
     }
 
+    /* Classes used to return specific data from the RobotUtils class */
     public static class VisionComponents {
         VisionPortal visionPortal;
         AprilTagProcessor aprilTagProcessor;
