@@ -60,7 +60,7 @@ public class Put extends LinearOpMode {
     final double ARM_WINCH_ROBOT           = 15  * ARM_TICKS_PER_DEGREE;
 
     /* Variables to store the speed the intake servo should be set at to intake, and deposit game elements. */
-    final double INTAKE_COLLECT    = -1.0;
+    final double INTAKE_COLLECT    = -1;
     final double INTAKE_OFF        =  0.0;
     final double INTAKE_DEPOSIT    =  0.5;
 
@@ -70,10 +70,10 @@ public class Put extends LinearOpMode {
     final double WRIST_FOLDED_LEFT = 0.1667;
 
     // Values for detecting blocks
-    private static final int[] RED_RGB = {880, 430, 225};
-    private static final int[] BLUE_RGB = {160, 330, 780};
-    private static final int[] YELLOW_RGB = {1450, 1730, 400};
-    private static final int TOLERANCE = 10;
+    private static final int[] RED_RGB = {4000, 2000, 1200};
+    private static final int[] BLUE_RGB = {1000, 2200, 4500};
+    private static final int[] YELLOW_RGB = {6500, 8500, 2000};
+    private static final int TOLERANCE = 500;
 
     /* Variables that are used to set the arm to a specific position */
     double armPosition = (int) ARM_COLLAPSED_INTO_ROBOT;
@@ -126,8 +126,14 @@ public class Put extends LinearOpMode {
 
         armPosition = (int) ARM_SEARCH;
         wristPosition = WRIST_FOLDED_OUT;
+        intakePower = INTAKE_COLLECT;
 
         while (opModeIsActive()) {
+            telemetry.update();
+
+            // Setting the intake power
+            intake.setPower(intakePower);
+            
             /* Changing the wrist's position */
             wrist.setPosition(wristPosition);
             
@@ -136,35 +142,26 @@ public class Put extends LinearOpMode {
 
             // Step 2: Detect the color of the block
             if (isYellowBlock()) {
-                telemetry.addLine("Red block detected!");
+                telemetry.addLine("Yellow block detected!");
                 // moveToBasket(-72, -72); // We are red
             } else if (isBlueBlock()) {
                 telemetry.addLine("Blue block detected!");
                 // moveToBasket(72, 72); // Moving to the other basket, but in practice we would just leave it if we are the red team
             } else if (isRedBlock()) {
-                telemetry.addLine("Yellow block detected!");
+                telemetry.addLine("Red block detected!");
                 // moveToBasket(-72, -72); // We are red
+            } else {
+                telemetry.addLine("Red: " + colorSensor.red() + " Green: " + colorSensor.green() + " Blue: " + colorSensor.blue());
+
+                leftDrive.setPower(0);
+                rightDrive.setPower(0);
+
+                continue;
             }
-            
-            telemetry.addLine("Red: " + colorSensor.red() + " Green: " + colorSensor.green() + " Blue: " + colorSensor.blue());
-            telemetry.update();
-            leftDrive.setPower(0);
-            rightDrive.setPower(0);
 
-            // // Step 3: Pick up the block
-            // pickUpBlock();
-
-            // // Step 4: Drop block in the basket
-            // dropBlockInBasket();
-
-            // sleep(1000);
-
-            // // Step 5: Reset robot position
-            // resetArmPosition();
-            // moveBackward(0.5, 1000);
-
-            // telemetry.addLine("Task Complete.");
-            telemetry.update();
+            armPosition = (int) ARM_COLLAPSED_INTO_ROBOT;
+            wristPosition = WRIST_FOLDED_IN;
+            intakePower = INTAKE_OFF;
         }
     }
 
