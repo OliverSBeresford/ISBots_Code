@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
 import java.util.List;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -24,7 +27,7 @@ public class RobotUtils {
     private IMU imu = null;
     private CRServo intake = null;
     private Servo wrist = null;
-    private DCMotorEx armMotor = null;
+    private DcMotorEx armMotor = null;
     private AprilTagProcessor aprilTagProcessor = null;
     private VisionPortal visionPortal = null;
 
@@ -64,7 +67,7 @@ public class RobotUtils {
         imu = _imu;
     }
 
-    public void setHardware(DcMotor _leftDrive, DcMotor _rightDrive, IMU _imu, CRServo _intake, Servo _wrist, DCMotorEx _armMotor) {
+    public void setHardware(DcMotor _leftDrive, DcMotor _rightDrive, IMU _imu, CRServo _intake, Servo _wrist, DcMotorEx _armMotor) {
         leftDrive = _leftDrive;
         rightDrive = _rightDrive;
         imu = _imu;
@@ -270,7 +273,7 @@ public class RobotUtils {
     }
 
     private static void turnToHeading(LinearOpMode opMode, IMU imu, double targetHeading) {
-        double currentHeading = imu.getYaw();
+        double currentHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         double turnAngle = targetHeading - currentHeading;
 
         if (turnAngle > 180) turnAngle -= 360;
@@ -405,7 +408,7 @@ public class RobotUtils {
         return new VisionComponents(myVisionPortal, myAprilTagProcessor);
     }
 
-    public Pose3D getData(LinearOpMode opMode, AprilTagProcessor myAprilTagProcessor, bool debugEnabled) {
+    public Pose3D getData(LinearOpMode opMode, AprilTagProcessor myAprilTagProcessor, boolean debugEnabled) {
         /* This function returns pose data (i.e. the robot's position on the field) using an AprilTag Detection 
          * 
          * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
@@ -438,11 +441,6 @@ public class RobotUtils {
                 opMode.telemetry.addLine("XYZ " + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getPosition().x, 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getPosition().y, 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getPosition().z, 6, 1) + "    (inch)");
                 opMode.telemetry.addLine("PRY " + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getOrientation().getPitch(), 6, 1) + "" + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getOrientation().getRoll(), 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.robotPose.getOrientation().getYaw(), 6, 1) + "    (deg)");
                 
-                // Raw data (relative to the apriltag)
-                opMode.telemetry.addLine("==== (ID " + myAprilTagDetection.id + ") " + myAprilTagDetection.metadata.name);
-                opMode.telemetry.addLine("XYZ (RAW) " + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getPosition().x, 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getPosition().y, 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getPosition().z, 6, 1) + "    (inch)");
-                opMode.telemetry.addLine("PRY (RAW) " + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getOrientation().getPitch(), 6, 1) + "" + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getOrientation().getRoll(), 6, 1) + " " + JavaUtil.formatNumber(myAprilTagDetection.rawPose.getOrientation().getYaw(), 6, 1) + "    (deg)");
-
                 // Useful information for debugging
                 opMode.telemetry.addLine("");
                 opMode.telemetry.addLine("key:");

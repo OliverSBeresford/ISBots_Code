@@ -100,6 +100,7 @@ public class Put extends LinearOpMode {
         // Initialize the robot utility class to have access to useful methods
         robotUtils = new RobotUtils();
         robotUtils.setHardware(leftDrive, rightDrive, imu, intake, wrist, armMotor);
+        robotUtils.initAprilTag();
 
         // Set motor directions
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -164,6 +165,10 @@ public class Put extends LinearOpMode {
             armPosition = (int) ARM_COLLAPSED_INTO_ROBOT;
             wristPosition = WRIST_FOLDED_IN;
             intakePower = INTAKE_OFF;
+
+            robotUtils.moveToBlueBasket(this, (int) ARM_SCORE_SAMPLE_IN_LOW);
+
+            intake.setPower(INTAKE_DEPOSIT);
         }
     }
 
