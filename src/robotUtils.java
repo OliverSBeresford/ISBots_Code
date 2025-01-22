@@ -223,19 +223,33 @@ public class RobotUtils {
             return;
         }
 
+        // Local variables for path following
+        double[] currentField = {0, 0};
+        double[] nextField = {0, 0};
+        double dx;
+        double dy;
+        double distance;
+        double targetHeading;
+        int[] current;
+        int[] next;
+
         // Follow the path
         for (int i = 1; i < path.size(); i++) {
-            int[] current = path.get(i - 1);
-            int[] next = path.get(i);
+            current = path.get(i - 1);
+            next = path.get(i);
 
             // Calculate direction and distance
-            double[] currentField = {currentPose.getPosition().x, currentPose.getPosition().y};
-            double[] nextField = gridToField(next[0], next[1]);
+            if (currentPose == null) {
+                currentField = gridToField(current[0], current[1]);
+            } else {
+                currentField = new double[]{currentPose.getPosition().x, currentPose.getPosition().y};
+            }
+            nextField = gridToField(next[0], next[1]);
 
-            double dx = nextField[0] - currentField[0];
-            double dy = nextField[1] - currentField[1];
-            double distance = Math.hypot(dx, dy);
-            double targetHeading = Math.toDegrees(Math.atan2(dy, dx));
+            dx = nextField[0] - currentField[0];
+            dy = nextField[1] - currentField[1];
+            distance = Math.hypot(dx, dy);
+            targetHeading = Math.toDegrees(Math.atan2(dy, dx));
 
             // Turn and move
             turnToHeading(opMode, imu, targetHeading);
