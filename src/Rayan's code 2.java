@@ -1,186 +1,138 @@
-package org.firstinspires.ftc.teamcode;
+import time
+import random
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.Servo;
+# Constants for robot dimensions and arena setup
+ROBOT_SPEED = 0.5  # Speed in m/s
+BLOCK_DETECTION_RANGE = 1.0  # Range of sensors in meters
+ARM_EXTENSION_LIMIT = 1.2  # Maximum arm extension in meters
+BASKET_POSITIONS = {'red': (5, 5), 'blue': (10, 5), 'yellow': (7, 10)}  # (x, y) positions
 
-@Autonomous(name = "AutonomousHookingFinal", group = "FTC")
-public class AutonomousHookingFinal extends LinearOpMode {
+# Simulated hardware classes
+class Motor:
+    def __init__(self, name):
+        self.name = name
+        self.speed = 0
 
-    // Declare motors, sensors, and servos
-    private DcMotor leftDrive = null;
-    private DcMotor rightDrive = null;
-    private DcMotor armMotor = null; // For lifting/lowering the arm
-    private DcMotor intakeMotor = null; // For bringing in the block (wheelie thing)
-    private Servo hookServo = null;
-    private ColorSensor colorSensor = null;
+    def set_speed(self, speed):
+        print(f"{self.name} motor speed set to {speed}")
+        self.speed = speed
 
-    // Constants
-    private static final double DRIVE_POWER = 0.5; // Speed for driving
-    private static final double INTAKE_POWER = 0.8; // Power for intake motor
-    private static final double ARM_POWER = 0.5; // Power for arm motor
-    private static final double HOOK_POSITION_OPEN = 0.0; // Servo open
-    private static final double HOOK_POSITION_CLOSED = 1.0; // Servo closed
-    private static final int ARM_LIFT_DURATION_MS = 1000; // Time for lifting arm in milliseconds
-    private static final int HOOKING_DELAY_MS = 1000; // Time for hooking in milliseconds
+    def stop(self):
+        print(f"{self.name} motor stopped")
+        self.speed = 0
 
-    @Override
-    public void runOpMode() {
-        // Hardware mapping
-        leftDrive = hardwareMap.get(DcMotor.class, "left_drive");
-        rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
-        armMotor = hardwareMap.get(DcMotor.class, "arm_motor");
-        intakeMotor = hardwareMap.get(DcMotor.class, "intake_motor");
-        hookServo = hardwareMap.get(Servo.class, "hook_servo");
-        colorSensor = hardwareMap.get(ColorSensor.class, "color_sensor");
+class Arm:
+    def __init__(self):
+        self.extension = 0
 
-        // Reverse one motor for tank drive
-        leftDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightDrive.setDirection(DcMotor.Direction.FORWARD);
+    def extend(self, distance):
+        if distance <= ARM_EXTENSION_LIMIT:
+            self.extension = distance
+            print(f"Arm extended to {distance} meters")
+        else:
+            print("Extension limit exceeded!")
 
-        // Wait for the start of the match
-        waitForStart();
+    def retract(self):
+        self.extension = 0
+        print("Arm retracted")
 
-        if (opModeIsActive()) {
-            // Drive to block area
-            moveToCoordinates(72, -72);
+class ColorSensor:
+    def detect_color(self):
+        # Simulating random block detection
+        return random.choice(['red', 'blue', 'yellow', None])
 
-            // Detect and hook blocks
-            while (opModeIsActive()) {
-                if (detectBlock()) {
-                    processAndHookBlock();
-                } else {
-                    telemetry.addData("Status", "No blocks detected.");
-                    telemetry.update();
-                    break;
-                }
-            }
-        }
-    }
+# Robot class for overall control
+class Robot:
+    def __init__(self):
+        self.left_motor = Motor("Left")
+        self.right_motor = Motor("Right")
+        self.arm = Arm()
+        self.sensor = ColorSensor()
+        self.position = (0, 0)
 
-    /**
-     * Moves the robot to a specific set of coordinates.
-     * Replace this placeholder with actual navigation logic.
-     *
-     * @param x Target X-coordinate.
-     * @param y Target Y-coordinate.
-     */
-    private void moveToCoordinates(double x, double y) {
-        telemetry.addData("Moving to", "Coordinates (" + x + ", " + y + ")");
-        telemetry.update();
-        sleep(2000); // Placeholder for actual movement logic
-    }
+    def move_to(self, x, y):
+        print(f"Moving from {self.position} to ({x}, {y})")
+        time.sleep(self.calculate_travel_time(self.position, (x, y)))
+        self.position = (x, y)
+        print(f"Arrived at ({x}, {y})")
 
-    /**
-     * Detects if a block is present using the color sensor.
-     *
-     * @return True if a block is detected, otherwise false.
-     */
-    private boolean detectBlock() {
-        telemetry.addData("Color Sensor Red", colorSensor.red());
-        telemetry.addData("Color Sensor Blue", colorSensor.blue());
-        telemetry.addData("Color Sensor Green", colorSensor.green());
-        telemetry.update();
+    def calculate_travel_time(self, start, end):
+        distance = ((end[0] - start[0])**2 + (end[1] - start[1])**2)**0.5
+        return distance / ROBOT_SPEED
 
-        // Example logic: Detect a block if any color reading is above a threshold
-        return (colorSensor.red() > 100 || colorSensor.blue() > 100 || colorSensor.green() > 100);
-    }
+    def pick_up_block(self):
+        print("Attempting to pick up block...")
+        detected_color = self.sensor.detect_color()
+        if detected_color:
+            print(f"Block detected: {detected_color}")
+            self.arm.extend(1.0)
+            time.sleep(1)
+            print("Block secured!")
+            self.arm.retract()
+            return detected_color
+        else:
+            print("No block detected!")
+            return None
 
-    /**
-     * Handles the full sequence for picking up and hooking a block.
-     */
-    private void processAndHookBlock() {
-        telemetry.addData("Status", "Processing block");
-        telemetry.update();
+    def place_block(self, color):
+        if color in BASKET_POSITIONS:
+            target = BASKET_POSITIONS[color]
+            print(f"Placing {color} block in basket at {target}")
+            self.move_to(*target)
+            self.arm.extend(1.0)
+            time.sleep(1)
+            print(f"{color} block placed in basket!")
+            self.arm.retract()
+        else:
+            print(f"Unknown basket for color: {color}")
 
-        // Step 1: Activate intake motor to pull the block in
-        intakeMotor.setPower(INTAKE_POWER);
-        moveSlightlyToAlign(); // Adjust position slightly if needed
-        sleep(1500); // Allow time for block to be fully inside arm
-        intakeMotor.setPower(0);
+# Autonomous sequence for the competition
+def autonomous_sequence(robot):
+    print("Starting autonomous sequence")
+    for _ in range(5):  # Attempt to process up to 5 blocks
+        # Move to random position to simulate searching for blocks
+        target_x = random.uniform(0, 15)
+        target_y = random.uniform(0, 15)
+        robot.move_to(target_x, target_y)
 
-        // Step 2: Lift the arm to the required height
-        liftArm();
+        # Attempt to pick up a block
+        color = robot.pick_up_block()
+        if color:
+            robot.place_block(color)
+        else:
+            print("Continuing search for blocks...")
 
-        // Step 3: Drive forward to the colored bar
-        driveToColoredBar();
+    print("Autonomous sequence completed")
 
-        // Step 4: Lower the arm to the hooking position
-        lowerArmToHook();
+# Teleoperated sequence for user control
+def teleoperated_control(robot):
+    print("Starting teleoperated control")
+    while True:
+        command = input("Enter command (move/pick/place/stop): ").strip().lower()
+        if command == "move":
+            x = float(input("Enter x-coordinate: "))
+            y = float(input("Enter y-coordinate: "))
+            robot.move_to(x, y)
+        elif command == "pick":
+            robot.pick_up_block()
+        elif command == "place":
+            color = input("Enter block color (red/blue/yellow): ").strip().lower()
+            robot.place_block(color)
+        elif command == "stop":
+            print("Stopping teleoperated control")
+            break
+        else:
+            print("Unknown command")
 
-        // Step 5: Drive backward to complete hooking
-        driveBackwardAfterHooking();
+# Main program
+if __name__ == "__main__":
+    my_robot = Robot()
 
-        telemetry.addData("Status", "Block successfully hooked");
-        telemetry.update();
-    }
-
-    /**
-     * Slightly adjusts the robot's position to align with the block.
-     * Modify this logic based on your specific hardware setup.
-     */
-    private void moveSlightlyToAlign() {
-        telemetry.addData("Adjusting position", "Aligning with block");
-        telemetry.update();
-        leftDrive.setPower(DRIVE_POWER);
-        rightDrive.setPower(-DRIVE_POWER); // Turn slightly
-        sleep(500); // Adjust time for fine alignment
-        leftDrive.setPower(0);
-        rightDrive.setPower(0);
-    }
-
-    /**
-     * Lifts the arm to the required height for hooking.
-     */
-    private void liftArm() {
-        telemetry.addData("Status", "Lifting arm");
-        telemetry.update();
-        armMotor.setPower(ARM_POWER);
-        sleep(ARM_LIFT_DURATION_MS);
-        armMotor.setPower(0);
-    }
-
-    /**
-     * Drives the robot forward to reach the colored bar.
-     */
-    private void driveToColoredBar() {
-        telemetry.addData("Status", "Driving to colored bar");
-        telemetry.update();
-        leftDrive.setPower(DRIVE_POWER);
-        rightDrive.setPower(DRIVE_POWER);
-        sleep(2000); // Adjust time based on distance to the bar
-        leftDrive.setPower(0);
-        rightDrive.setPower(0);
-    }
-
-    /**
-     * Lowers the arm to hook the block onto the bar.
-     */
-    private void lowerArmToHook() {
-        telemetry.addData("Status", "Lowering arm to hook");
-        telemetry.update();
-        armMotor.setPower(-ARM_POWER); // Lower arm
-        sleep(500); // Lower to a predefined angle
-        armMotor.setPower(0);
-
-        // Further lower arm for the hook to secure
-        armMotor.setPower(-ARM_POWER);
-        sleep(200); // Fine adjustment for 10-degree additional lowering
-        armMotor.setPower(0);
-    }
-
-    /**
-     * Drives the robot backward to complete the hooking process.
-     */
-    private void driveBackwardAfterHooking() {
-        telemetry.addData("Status", "Driving backward to finalize hooking");
-        telemetry.update();
-        leftDrive.setPower(-DRIVE_POWER);
-        rightDrive.setPower(-DRIVE_POWER);
-        sleep(1000); // Adjust time for backward movement
-        leftDrive.setPower(0);
-        rightDrive.setPower(0);
-    }
-}
+    # Choose mode
+    mode = input("Enter mode (autonomous/teleoperated): ").strip().lower()
+    if mode == "autonomous":
+        autonomous_sequence(my_robot)
+    elif mode == "teleoperated":
+        teleoperated_control(my_robot)
+    else:
+        print("Invalid mode selected")
