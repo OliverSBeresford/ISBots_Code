@@ -211,7 +211,7 @@ public class RobotUtils {
 
         // Drive to the blue basket
         // Convert field coordinates to grid indices
-        int[] start = fieldToGrid(poseData.getPosition().x, poseData.getPosition().y);
+        int[] start = fieldToGrid(currentPose.getPosition().x, currentPose.getPosition().y);
         int[] target = fieldToGrid(60, 60);
 
         // Perform A* pathfinding
