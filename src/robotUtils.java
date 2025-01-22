@@ -1,6 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
 import java.util.List;
+import java.util.Comparator;
+import java.util.PriorityQueue;
+import java.util.HashSet;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Set;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -22,14 +29,14 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 public class RobotUtils {
 
-    private DcMotor leftDrive = null;
-    private DcMotor rightDrive = null;
-    private IMU imu = null;
-    private CRServo intake = null;
-    private Servo wrist = null;
-    private DcMotorEx armMotor = null;
-    private AprilTagProcessor aprilTagProcessor = null;
-    private VisionPortal visionPortal = null;
+    private static DcMotor leftDrive = null;
+    private static DcMotor rightDrive = null;
+    private static IMU imu = null;
+    private static CRServo intake = null;
+    private static Servo wrist = null;
+    private static DcMotorEx armMotor = null;
+    private static AprilTagProcessor aprilTagProcessor = null;
+    private static VisionPortal visionPortal = null;
 
     // Define the 6x6 grid. 1 = obstacle, 0 = traversable
     private static final int[][] FIELD = {
@@ -77,7 +84,7 @@ public class RobotUtils {
     }
 
     /* These functions relate to physical behaior of the robot */
-    public void turnDegrees(LinearOpMode opMode, double turnAngle) {
+    public static void turnDegrees(LinearOpMode opMode, double turnAngle) {
         /* This function turn the robot a certain number of degrees
          * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
          *             double turnAngle - The number of degrees to turn the robot.
@@ -214,13 +221,23 @@ public class RobotUtils {
             return;
         }
 
+        moveArm(opMode, armPosition);
+
+        opMode.telemetry.addLine("Moved arm. Proceeding.");
+        opMode.telemetry.update();
+
         Pose3D currentPose;
 
-        currentPose = getData(opMode, aprilTagProcessor, false);
+        currentPose = getData(opMode, aprilTagProcessor, true);
 
         // Drive to the blue basket
         // Convert field coordinates to grid indices
-        int[] start = fieldToGrid(currentPose.getPosition().x, currentPose.getPosition().y);
+        int[] start;
+        if (currentPose == null) {
+            start = new int[]{0, 0};
+        } else {
+            start = fieldToGrid(currentPose.getPosition().x, currentPose.getPosition().y);
+        }
         int[] target = fieldToGrid(60, 60);
 
         // Perform A* pathfinding
@@ -244,6 +261,8 @@ public class RobotUtils {
 
         // Follow the path
         for (int i = 1; i < path.size(); i++) {
+            intake.setPower(0);
+
             current = path.get(i - 1);
             next = path.get(i);
 
@@ -296,12 +315,12 @@ public class RobotUtils {
     }
 
     private static List<int[]> aStar(int[][] grid, int[] start, int[] goal) {
-        PriorityQueue<Node> openSet = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fCost));
+        PriorityQueue<Node2> openSet = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fCost));
         Set<String> closedSet = new HashSet<>();
-        openSet.add(new Node(start, null, 0, heuristic(start, goal)));
+        openSet.add(new Node2(start, null, 0, heuristic(start, goal)));
 
         while (!openSet.isEmpty()) {
-            Node current = openSet.poll();
+            Node2 current = openSet.poll();
             int[] pos = current.position;
 
             if (Arrays.equals(pos, goal)) return reconstructPath(current);
@@ -314,7 +333,7 @@ public class RobotUtils {
                 if (isValid(neighbor, grid) && !closedSet.contains(Arrays.toString(neighbor))) {
                     double gCost = current.gCost + 1;
                     double hCost = heuristic(neighbor, goal);
-                    openSet.add(new Node(neighbor, current, gCost, gCost + hCost));
+                    openSet.add(new Node2(neighbor, current, gCost, gCost + hCost));
                 }
             }
         }
@@ -331,7 +350,7 @@ public class RobotUtils {
         return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
     }
 
-    private static List<int[]> reconstructPath(Node node) {
+    private static List<int[]> reconstructPath(Node2 node) {
         List<int[]> path = new ArrayList<>();
         while (node != null) {
             path.add(node.position);
@@ -341,12 +360,12 @@ public class RobotUtils {
         return path;
     }
 
-    private static class Node {
+    private static class Node2 {
         int[] position;
-        Node parent;
+        Node2 parent;
         double gCost, fCost;
 
-        Node(int[] position, Node parent, double gCost, double fCost) {
+        Node2(int[] position, Node2 parent, double gCost, double fCost) {
             this.position = position;
             this.parent = parent;
             this.gCost = gCost;
@@ -447,15 +466,18 @@ public class RobotUtils {
                 opMode.telemetry.addLine("XYZ = X (Right), Y (Forward), Z (Up) dist.");
                 opMode.telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");
 
+                opMode.telemetry.update();
+
                 return myAprilTagDetection.robotPose;
             } else {
                 opMode.telemetry.addLine("==== (ID " + myAprilTagDetection.id + ") Unknown");
                 opMode.telemetry.addLine("Center " + JavaUtil.formatNumber(myAprilTagDetection.center.x, 6, 0) + "" + JavaUtil.formatNumber(myAprilTagDetection.center.y, 6, 0) + " (pixels)");
+                opMode.telemetry.update();
                 return null;
             }
         }
+        return null;
     }
-
     /* Classes used to return specific data from the RobotUtils class */
     public static class VisionComponents {
         VisionPortal visionPortal;

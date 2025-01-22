@@ -100,7 +100,7 @@ public class Put extends LinearOpMode {
         // Initialize the robot utility class to have access to useful methods
         robotUtils = new RobotUtils();
         robotUtils.setHardware(leftDrive, rightDrive, imu, intake, wrist, armMotor);
-        robotUtils.initAprilTag();
+        robotUtils.initAprilTag(this);
 
         // Set motor directions
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -156,8 +156,8 @@ public class Put extends LinearOpMode {
             } else {
                 telemetry.addLine("Red: " + colorSensor.red() + " Green: " + colorSensor.green() + " Blue: " + colorSensor.blue());
 
-                leftDrive.setPower(0);
-                rightDrive.setPower(0);
+                leftDrive.setPower(0.1);
+                rightDrive.setPower(0.1);
 
                 continue;
             }
@@ -165,6 +165,8 @@ public class Put extends LinearOpMode {
             armPosition = (int) ARM_COLLAPSED_INTO_ROBOT;
             wristPosition = WRIST_FOLDED_IN;
             intakePower = INTAKE_OFF;
+
+            intake.setPower(intakePower);
 
             robotUtils.moveToBlueBasket(this, (int) ARM_SCORE_SAMPLE_IN_LOW);
 
