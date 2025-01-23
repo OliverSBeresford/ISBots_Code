@@ -315,8 +315,8 @@ public class RobotUtils {
     }
 
     private static double[] gridToField(int row, int col) {
-        double x = (col - 3) * CELL_SIZE + CELL_SIZE / 2;
-        double y = (3 - row) * CELL_SIZE - CELL_SIZE / 2;
+        double x = (col - GRID_SIZE) * CELL_SIZE + CELL_SIZE / 2;
+        double y = (GRID_SIZE - row) * CELL_SIZE - CELL_SIZE / 2;
         return new double[]{x, y};
     }
 
