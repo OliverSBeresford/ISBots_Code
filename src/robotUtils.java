@@ -40,23 +40,17 @@ public class RobotUtils {
 
     // Define the 6x6 grid. 1 = obstacle, 0 = traversable
     private static final int[][] FIELD = {
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
-        {0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0},
-        {0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0},
-        {0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0},
-        {0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0},
-        {1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+        {0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 1},
+        {0, 0, 1, 1, 0, 0},
+        {0, 0, 1, 1, 0, 0},
+        {1, 0, 0, 0, 0, 1},
+        {0, 0, 0, 0, 0, 0}
     };
 
     // Grid dimensions
-    private static final int GRID_SIZE = 12;
-    private static final double CELL_SIZE = 12; // Inches
+    private static final int GRID_SIZE = 6;
+    private static final double CELL_SIZE = 24.0; // Inches
 
     /* These are the various functions to initialize whatever parts of the RobotUtils class you need
      * 
@@ -321,8 +315,8 @@ public class RobotUtils {
     }
 
     private static double[] gridToField(int row, int col) {
-        double x = (col - GRID_SIZE) * CELL_SIZE + CELL_SIZE / 2;
-        double y = (GRID_SIZE - row) * CELL_SIZE - CELL_SIZE / 2;
+        double x = (col - 3) * CELL_SIZE + CELL_SIZE / 2;
+        double y = (3 - row) * CELL_SIZE - CELL_SIZE / 2;
         return new double[]{x, y};
     }
 
