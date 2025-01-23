@@ -168,7 +168,7 @@ public class Put extends LinearOpMode {
 
             intake.setPower(intakePower);
 
-            robotUtils.moveToBlueBasket(this, (int) ARM_SCORE_SAMPLE_IN_LOW);
+            robotUtils.moveToBlueBasket(this, (int) ARM_SCORE_SAMPLE_IN_LOW, true);
 
             intake.setPower(INTAKE_DEPOSIT);
         }

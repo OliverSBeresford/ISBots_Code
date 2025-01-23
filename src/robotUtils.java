@@ -211,7 +211,7 @@ public class RobotUtils {
         }
     }
 
-    public void moveToBlueBasket(LinearOpMode opMode, int armPosition) {
+    public void moveToBlueBasket(LinearOpMode opMode, int armPosition, boolean debugEnabled) {
         /* This function moves the robot to the blue basket
          * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
          */
@@ -223,12 +223,19 @@ public class RobotUtils {
 
         moveArm(opMode, armPosition);
 
-        opMode.telemetry.addLine("Moved arm. Proceeding.");
-        opMode.telemetry.update();
+        if (debugEnabled) {
+            opMode.telemetry.addLine("Moved arm. Proceeding.");
+            opMode.telemetry.update();
+        }
 
         Pose3D currentPose;
 
         currentPose = getData(opMode, aprilTagProcessor, true);
+
+        if (debugEnabled) {
+            opMode.telemetry.addLine("Got data. Making grid.");
+            opMode.telemetry.update();
+        }
 
         // Drive to the blue basket
         // Convert field coordinates to grid indices
@@ -240,8 +247,13 @@ public class RobotUtils {
         }
         int[] target = fieldToGrid(60, 60);
 
+        if (debugEnabled) {
+            opMode.telemetry.addLine("Calculated grid. Starting pathfinding.");
+            opMode.telemetry.update();
+        }
+
         // Perform A* pathfinding
-        List<int[]> path = aStar(FIELD, start, target);
+        List<int[]> path = aStar(opMode, FIELD, start, target);
 
         if (path == null) {
             opMode.telemetry.addData("Error", "No path found.");
@@ -314,12 +326,19 @@ public class RobotUtils {
         return new double[]{x, y};
     }
 
-    private static List<int[]> aStar(int[][] grid, int[] start, int[] goal) {
+    private static List<int[]> aStar(LinearOpMode opMode, int[][] grid, int[] start, int[] goal) {
+        int iterations = 0;
+
         PriorityQueue<Node2> openSet = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fCost));
         Set<String> closedSet = new HashSet<>();
         openSet.add(new Node2(start, null, 0, heuristic(start, goal)));
 
         while (!openSet.isEmpty()) {
+            iterations += 1;
+
+            opMode.telemetry.addLine("Iteration: " + iterations);
+            opMode.telemetry.update();
+
             Node2 current = openSet.poll();
             int[] pos = current.position;
 
