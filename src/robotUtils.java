@@ -37,6 +37,12 @@ public class RobotUtils {
     private static DcMotorEx armMotor = null;
     private static AprilTagProcessor aprilTagProcessor = null;
     private static VisionPortal visionPortal = null;
+    
+    // Values for detecting blocks
+    private static final int[] RED_RGB = {4000, 2000, 1200};
+    private static final int[] BLUE_RGB = {1000, 2200, 4500};
+    private static final int[] YELLOW_RGB = {6500, 8500, 2000};
+    private static final int TOLERANCE = 500;
 
     // Define the 6x6 grid. 1 = obstacle, 0 = traversable
     private static final int[][] FIELD = {
@@ -315,8 +321,8 @@ public class RobotUtils {
     }
 
     private static double[] gridToField(int row, int col) {
-        double x = (col - GRID_SIZE) * CELL_SIZE + CELL_SIZE / 2;
-        double y = (GRID_SIZE - row) * CELL_SIZE - CELL_SIZE / 2;
+        double x = (col - 3) * CELL_SIZE + CELL_SIZE / 2;
+        double y = (3 - row) * CELL_SIZE - CELL_SIZE / 2;
         return new double[]{x, y};
     }
 
@@ -491,6 +497,37 @@ public class RobotUtils {
         }
         return null;
     }
+    
+    /* Color sensing functions */
+    public boolean isBlockPresent() {
+        return (colorSensor.red() > colorThreshold || colorSensor.green() > colorThreshold || colorSensor.blue() > colorThreshold);
+    }
+
+    public boolean isRedBlock() {
+        return isBlockPresent() &&
+               isWithinRange(colorSensor.red(), RED_RGB[0], TOLERANCE) &&
+               isWithinRange(colorSensor.green(), RED_RGB[1], TOLERANCE) &&
+               isWithinRange(colorSensor.blue(), RED_RGB[2], TOLERANCE);
+    }
+    
+    public boolean isBlueBlock() {
+        return isBlockPresent() &&
+               isWithinRange(colorSensor.red(), BLUE_RGB[0], TOLERANCE) &&
+               isWithinRange(colorSensor.green(), BLUE_RGB[1], TOLERANCE) &&
+               isWithinRange(colorSensor.blue(), BLUE_RGB[2], TOLERANCE);
+    }
+    
+    public boolean isYellowBlock() {
+        return isBlockPresent() &&
+               isWithinRange(colorSensor.red(), YELLOW_RGB[0], TOLERANCE) &&
+               isWithinRange(colorSensor.green(), YELLOW_RGB[1], TOLERANCE) &&
+               isWithinRange(colorSensor.blue(), YELLOW_RGB[2], TOLERANCE);
+    }
+    
+    private boolean isWithinRange(int actual, int target, int tolerance) {
+        return Math.abs(actual - target) <= tolerance;
+    }
+    
     /* Classes used to return specific data from the RobotUtils class */
     public static class VisionComponents {
         VisionPortal visionPortal;
