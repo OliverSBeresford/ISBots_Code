@@ -499,7 +499,7 @@ public class RobotUtils {
     }
     
     /* Color sensing functions */
-    public boolean isBlockPresent() {
+    private boolean isBlockPresent() {
         return (colorSensor.red() > colorThreshold || colorSensor.green() > colorThreshold || colorSensor.blue() > colorThreshold);
     }
 
