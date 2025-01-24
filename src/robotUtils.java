@@ -312,7 +312,9 @@ public class RobotUtils {
 
         turnDegrees(opMode, turnAngle);
     }
+    /* *********************** End robot physical behavior functions *********************** */
 
+    /* *********************** These functions relate to pathfinding *********************** */
     private static int[] fieldToGrid(double x, double y) {
         // Assuming the bottom left corner corresponds to the coordinates (-72, -72)
         int col = (int) Math.floor((x + 72) / CELL_SIZE);
@@ -378,23 +380,10 @@ public class RobotUtils {
         Collections.reverse(path);
         return path;
     }
+    /* End pathfinding functions */
+    
 
-    private static class Node2 {
-        int[] position;
-        Node2 parent;
-        double gCost, fCost;
-
-        Node2(int[] position, Node2 parent, double gCost, double fCost) {
-            this.position = position;
-            this.parent = parent;
-            this.gCost = gCost;
-            this.fCost = fCost;
-        }
-    }
-
-    /* These functions relate to the AprilTag detection system. 
-     * 
-    */
+    /* *********************** These functions relate to the AprilTag detection system. *********************** */
     public VisionComponents initAprilTag(LinearOpMode opMode) {
         // Variables to store the position and orientation of the camera on the robot. Setting these
         // values requires a definition of the axes of the camera and robot:
@@ -497,8 +486,10 @@ public class RobotUtils {
         }
         return null;
     }
+    /* *********************** End AprilTag detection functions *********************** */
     
     /* Color sensing functions */
+    /* *********************** Color sensing functions *********************** */
     private boolean isBlockPresent() {
         return (colorSensor.red() > colorThreshold || colorSensor.green() > colorThreshold || colorSensor.blue() > colorThreshold);
     }
@@ -523,12 +514,13 @@ public class RobotUtils {
                isWithinRange(colorSensor.green(), YELLOW_RGB[1], TOLERANCE) &&
                isWithinRange(colorSensor.blue(), YELLOW_RGB[2], TOLERANCE);
     }
+    /* *********************** End color sensing functions *********************** */
     
     private boolean isWithinRange(int actual, int target, int tolerance) {
         return Math.abs(actual - target) <= tolerance;
     }
     
-    /* Classes used to return specific data from the RobotUtils class */
+    /* *********************** Classes used to return specific data from the RobotUtils class *********************** */
     public static class VisionComponents {
         VisionPortal visionPortal;
         AprilTagProcessor aprilTagProcessor;
@@ -538,4 +530,17 @@ public class RobotUtils {
             aprilTagProcessor = apriltag_processor; 
         }
     }
+    private static class Node2 {
+        int[] position;
+        Node2 parent;
+        double gCost, fCost;
+
+        Node2(int[] position, Node2 parent, double gCost, double fCost) {
+            this.position = position;
+            this.parent = parent;
+            this.gCost = gCost;
+            this.fCost = fCost;
+        }
+    }
+    /* *********************** End classes used to return specific data from the RobotUtils class *********************** */
 }
