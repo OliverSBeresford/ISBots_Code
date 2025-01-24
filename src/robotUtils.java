@@ -46,6 +46,14 @@ public class RobotUtils {
     private static final int[] YELLOW_RGB = {6500, 8500, 2000};
     private static final int TOLERANCE = 500;
 
+    // Constants for pathfinding
+    public static final int[] BLUE_BASKET = {72, 72, 25.75};
+    public static final int[] RED_BASKET = {-72, -72, 25.75};
+    public static final int[] RED_HIGH_CHAMBER = {0, -24, 26};
+    public static final int[] BLUE_HIGH_CHAMBER = {0, 24, 26};
+    public static final int[] RED_ASCENT = {-24, 0, 20};
+    public static final int[] BLUE_ASCENT = {24, 0, 20};
+
     // Define the 6x6 grid. 1 = obstacle, 0 = traversable
     private static final int[][] FIELD = {
         {0, 0, 0, 0, 0, 0},
