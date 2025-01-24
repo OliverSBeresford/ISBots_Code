@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -37,6 +38,7 @@ public class RobotUtils {
     private static DcMotorEx armMotor = null;
     private static AprilTagProcessor aprilTagProcessor = null;
     private static VisionPortal visionPortal = null;
+    private static ColorSensor colorSensor = null;
     
     // Values for detecting blocks
     private static final int[] RED_RGB = {4000, 2000, 1200};
@@ -83,7 +85,11 @@ public class RobotUtils {
         armMotor = _armMotor;
     }
 
-    /* These functions relate to physical behaior of the robot */
+    public void setColorSensor(ColorSensor _colorSensor) {
+        colorSensor = _colorSensor;
+    }
+
+    /* *********************** These functions relate to physical behaior of the robot *********************** */
     public static void turnDegrees(LinearOpMode opMode, double turnAngle) {
         /* This function turn the robot a certain number of degrees
          * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
@@ -488,9 +494,11 @@ public class RobotUtils {
     }
     /* *********************** End AprilTag detection functions *********************** */
     
-    /* Color sensing functions */
     /* *********************** Color sensing functions *********************** */
     private boolean isBlockPresent() {
+        if (colorSensor == null) {
+            return false;
+        }
         return (colorSensor.red() > colorThreshold || colorSensor.green() > colorThreshold || colorSensor.blue() > colorThreshold);
     }
 
@@ -515,6 +523,10 @@ public class RobotUtils {
                isWithinRange(colorSensor.blue(), YELLOW_RGB[2], TOLERANCE);
     }
     /* *********************** End color sensing functions *********************** */
+
+    public boolean isAnyColorBlock() {
+        return isRedBlock() || isBlueBlock() || isYellowBlock();
+    }
     
     private boolean isWithinRange(int actual, int target, int tolerance) {
         return Math.abs(actual - target) <= tolerance;
