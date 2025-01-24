@@ -40,6 +40,8 @@ public class RobotUtils {
     private static VisionPortal visionPortal = null;
     private static ColorSensor colorSensor = null;
     
+    private static double imuCorrection = 0.0;
+    
     // Values for detecting blocks
     private static final int[] RED_RGB = {4000, 2000, 1200};
     private static final int[] BLUE_RGB = {1000, 2200, 4500};
@@ -54,6 +56,10 @@ public class RobotUtils {
     public static final int[] RED_ASCENT = {-24, 0, 20};
     public static final int[] BLUE_ASCENT = {24, 0, 20};
 
+    // Grid dimensions
+    private static final int GRID_SIZE = 6;
+    private static final double CELL_SIZE = 24.0; // Inches
+
     // Define the 6x6 grid. 1 = obstacle, 0 = traversable
     private static final int[][] FIELD = {
         {0, 0, 0, 0, 0, 0},
@@ -63,10 +69,6 @@ public class RobotUtils {
         {1, 0, 0, 0, 0, 1},
         {0, 0, 0, 0, 0, 0}
     };
-
-    // Grid dimensions
-    private static final int GRID_SIZE = 6;
-    private static final double CELL_SIZE = 24.0; // Inches
 
     /* These are the various functions to initialize whatever parts of the RobotUtils class you need
      * 
@@ -203,7 +205,7 @@ public class RobotUtils {
         rightDrive.setPower(power);
 
         while (leftDrive.isBusy() && rightDrive.isBusy() && opMode.opModeIsActive()) {
-            double currentHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            double currentHeading = getYawIMU();;
             double error = targetHeading - currentHeading;
 
             double correction = error * 0.02; // Proportional constant
@@ -274,6 +276,7 @@ public class RobotUtils {
             start = new int[]{0, 0};
         } else {
             start = fieldToGrid(currentPose.getPosition().x, currentPose.getPosition().y);
+            setYawIMU(currentPose.getOrientation().getYaw(AngleUnit.DEGREES));
         }
         int[] target = fieldToGrid(targetX, targetY);
 
@@ -313,6 +316,7 @@ public class RobotUtils {
                 currentField = gridToField(current[0], current[1]);
             } else {
                 currentField = new double[]{currentPose.getPosition().x, currentPose.getPosition().y};
+                setYawIMU(currentPose.getOrientation().getYaw(AngleUnit.DEGREES));
             }
             nextField = gridToField(next[0], next[1]);
 
@@ -334,7 +338,7 @@ public class RobotUtils {
     }
 
     private static void turnToHeading(LinearOpMode opMode, IMU imu, double targetHeading, boolean debugEnabled) {
-        double currentHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        double currentHeading = getYawIMU();
         double turnAngle = targetHeading - currentHeading;
 
         if (turnAngle > 180) turnAngle -= 360;
@@ -342,6 +346,20 @@ public class RobotUtils {
 
         turnDegrees(opMode, turnAngle, debugEnabled);
     }
+
+    private static void setYawIMU(double yaw) {
+        if (imu != null) {
+            imuCorrection = yaw - imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        }
+    }
+
+    private static double getYawIMU() {
+        if (imu != null) {
+            return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) + imuCorrection;
+        }
+        return 0;
+    }
+
     /* *********************** End robot physical behavior functions *********************** */
 
     /* *********************** These functions relate to pathfinding *********************** */
@@ -507,6 +525,10 @@ public class RobotUtils {
                 opMode.telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");
 
                 opMode.telemetry.update();
+
+                if (imu != null) {
+                    opMode.telemetry.addData("IMU yaw", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+                }
 
                 return myAprilTagDetection.robotPose;
             } else {
