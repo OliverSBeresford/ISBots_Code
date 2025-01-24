@@ -88,6 +88,7 @@ public class RobotUtils {
     public void setColorSensor(ColorSensor _colorSensor) {
         colorSensor = _colorSensor;
     }
+    /* *********************** End initialization functions *********************** */
 
     /* *********************** These functions relate to physical behaior of the robot *********************** */
     public static void turnDegrees(LinearOpMode opMode, double turnAngle) {
@@ -386,7 +387,7 @@ public class RobotUtils {
         Collections.reverse(path);
         return path;
     }
-    /* End pathfinding functions */
+    /* *********************** End pathfinding functions *********************** */
     
 
     /* *********************** These functions relate to the AprilTag detection system. *********************** */
