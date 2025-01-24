@@ -226,7 +226,7 @@ public class RobotUtils {
         }
     }
 
-    public void moveToBlueBasket(LinearOpMode opMode, int armPosition, boolean debugEnabled) {
+    public void navigateTo(LinearOpMode opMode, int armPosition, boolean debugEnabled) {
         /* This function moves the robot to the blue basket
          * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
          */
