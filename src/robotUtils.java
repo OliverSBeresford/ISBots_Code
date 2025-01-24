@@ -99,7 +99,7 @@ public class RobotUtils {
     /* *********************** End initialization functions *********************** */
 
     /* *********************** These functions relate to physical behaior of the robot *********************** */
-    public static void turnDegrees(LinearOpMode opMode, double turnAngle) {
+    public static void turnDegrees(LinearOpMode opMode, double turnAngle, boolean debugEnabled) {
         /* This function turn the robot a certain number of degrees
          * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
          *             double turnAngle - The number of degrees to turn the robot.
@@ -108,6 +108,11 @@ public class RobotUtils {
         // Making sure hardware is initialized
         if (leftDrive == null || rightDrive == null || imu == null) {
             return;
+        }
+
+        if (debugEnabled) {
+            opMode.telemetry.addData("Turning", turnAngle);
+            opMode.telemetry.update();
         }
 
         double currentAngle;
@@ -162,7 +167,7 @@ public class RobotUtils {
         rightDrive.setPower(0);
     }
 
-    public void driveStraight(LinearOpMode opMode, double distanceInInches, double power, double targetHeading) {
+    public void driveStraight(LinearOpMode opMode, double distanceInInches, double power, double targetHeading, boolean debugEnabled) {
         /* This function drives the robot a certain distance in inches
          * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
          *             double distanceInInches - The distance to drive the robot in inches.
@@ -173,6 +178,11 @@ public class RobotUtils {
         // Making sure hardware is initialized
         if (leftDrive == null || rightDrive == null || imu == null) {
             return;
+        }
+
+        if (debugEnabled) {
+            opMode.telemetry.addData("Driving", distanceInInches);
+            opMode.telemetry.update();
         }
 
         int ticksPerRevolution = ((((1 + (46 / 17))) * (1 + (46 / 11))) * 28); // Got this from GOBilda
@@ -250,7 +260,7 @@ public class RobotUtils {
 
         Pose3D currentPose;
 
-        currentPose = getData(opMode, aprilTagProcessor, true);
+        currentPose = getData(opMode, aprilTagProcessor, debugEnabled);
 
         if (debugEnabled) {
             opMode.telemetry.addLine("Got data. Making grid.");
@@ -273,7 +283,7 @@ public class RobotUtils {
         }
 
         // Perform A* pathfinding
-        List<int[]> path = aStar(opMode, FIELD, start, target, true);
+        List<int[]> path = aStar(opMode, FIELD, start, target, debugEnabled);
 
         if (path == null) {
             opMode.telemetry.addData("Error", "No path found.");
@@ -312,8 +322,8 @@ public class RobotUtils {
             targetHeading = Math.toDegrees(Math.atan2(dy, dx));
 
             // Turn and move
-            turnToHeading(opMode, imu, targetHeading);
-            driveStraight(opMode, distance, 0.5, targetHeading);
+            turnToHeading(opMode, imu, targetHeading, debugEnabled);
+            driveStraight(opMode, distance, 0.5, targetHeading, debugEnabled);
 
             // Correct position periodically
             currentPose = getData(opMode, aprilTagProcessor, false);
@@ -323,14 +333,14 @@ public class RobotUtils {
         }
     }
 
-    private static void turnToHeading(LinearOpMode opMode, IMU imu, double targetHeading) {
+    private static void turnToHeading(LinearOpMode opMode, IMU imu, double targetHeading, boolean debugEnabled) {
         double currentHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         double turnAngle = targetHeading - currentHeading;
 
         if (turnAngle > 180) turnAngle -= 360;
         if (turnAngle < -180) turnAngle += 360;
 
-        turnDegrees(opMode, turnAngle);
+        turnDegrees(opMode, turnAngle, debugEnabled);
     }
     /* *********************** End robot physical behavior functions *********************** */
 
