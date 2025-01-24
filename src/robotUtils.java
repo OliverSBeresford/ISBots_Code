@@ -55,6 +55,8 @@ public class RobotUtils {
     public static final int[] BLUE_HIGH_CHAMBER = {0, 24, 26};
     public static final int[] RED_ASCENT = {-24, 0, 20};
     public static final int[] BLUE_ASCENT = {24, 0, 20};
+    public static final int[] RED_START = {72, -72, 0};
+    public static final int[] BLUE_START = {-72, 72, 0};
 
     // Grid dimensions
     private static final int GRID_SIZE = 6;
@@ -238,7 +240,7 @@ public class RobotUtils {
         }
     }
 
-    public void navigateTo(LinearOpMode opMode, int armPosition, int[] destination, boolean debugEnabled) {
+    public void navigateTo(LinearOpMode opMode, int armPosition, int[] destination, int[] origin, boolean debugEnabled) {
         /* This function moves the robot to the blue basket
          * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
          */
@@ -271,10 +273,8 @@ public class RobotUtils {
 
         // Drive to the blue basket
         // Convert field coordinates to grid indices
-        int[] start;
-        if (currentPose == null) {
-            start = new int[]{0, 0};
-        } else {
+        int[] start = fieldToGrid(origin[0], origin[1]);
+        if (currentPose != null) {
             start = fieldToGrid(currentPose.getPosition().x, currentPose.getPosition().y);
             setYawIMU(currentPose.getOrientation().getYaw(AngleUnit.DEGREES));
         }
