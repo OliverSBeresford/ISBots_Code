@@ -265,7 +265,7 @@ public class RobotUtils {
         } else {
             start = fieldToGrid(currentPose.getPosition().x, currentPose.getPosition().y);
         }
-        int[] target = fieldToGrid(60, 60);
+        int[] target = fieldToGrid(targetX, targetY);
 
         if (debugEnabled) {
             opMode.telemetry.addLine("Calculated grid. Starting pathfinding.");
