@@ -260,7 +260,7 @@ public class RobotUtils {
         }
 
         // Perform A* pathfinding
-        List<int[]> path = aStar(opMode, FIELD, start, target);
+        List<int[]> path = aStar(opMode, FIELD, start, target, true);
 
         if (path == null) {
             opMode.telemetry.addData("Error", "No path found.");
@@ -335,7 +335,7 @@ public class RobotUtils {
         return new double[]{x, y};
     }
 
-    private static List<int[]> aStar(LinearOpMode opMode, int[][] grid, int[] start, int[] goal) {
+    private static List<int[]> aStar(LinearOpMode opMode, int[][] grid, int[] start, int[] goal, boolean debugEnabled) {
         int iterations = 0;
 
         PriorityQueue<Node2> openSet = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fCost));
@@ -345,8 +345,10 @@ public class RobotUtils {
         while (!openSet.isEmpty()) {
             iterations += 1;
 
-            opMode.telemetry.addLine("Iteration: " + iterations);
-            opMode.telemetry.update();
+            if (debugEnabled) {
+                opMode.telemetry.addLine("Iteration: " + iterations);
+                opMode.telemetry.update();
+            }
 
             Node2 current = openSet.poll();
             int[] pos = current.position;
