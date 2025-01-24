@@ -4,6 +4,9 @@ import org.firstinspires.ftc.teamcode.RobotUtils;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+
+import java.net.InterfaceAddress;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -52,6 +55,8 @@ public class ISBotsTeleOp extends LinearOpMode {
     public DcMotor  armMotor    = null; //the arm motor
     public CRServo  intake      = null; //the active intake servo
     public Servo    wrist       = null; //the wrist servo
+    private ColorSensor colorSensor;
+    private RobotUtils robotUtils;
 
 
     /* This constant is the number of encoder ticks for each degree of rotation of the arm.
@@ -122,9 +127,15 @@ public class ISBotsTeleOp extends LinearOpMode {
 
 
         /* Define and Initialize Motors */
-        leftDrive  = hardwareMap.get(DcMotor.class, "leftMotor"); //the left drivetrain motor
-        rightDrive = hardwareMap.get(DcMotor.class, "rightMotor"); //the right drivetrain motor
-        armMotor   = hardwareMap.get(DcMotor.class, "armMotor"); //the arm motor
+        leftDrive   = hardwareMap.get(DcMotor.class, "leftMotor"); //the left drivetrain motor
+        rightDrive  = hardwareMap.get(DcMotor.class, "rightMotor"); //the right drivetrain motor
+        armMotor    = hardwareMap.get(DcMotor.class, "armMotor"); //the arm motor
+        colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+
+        // Initialize the robot utility class to have access to useful methods
+        robotUtils = new RobotUtils();
+        robotUtils.setHardware(leftDrive, rightDrive, imu, intake, wrist, armMotor);
+        robotUtils.setColorSensor(colorSensor);
 
 
         /* Most skid-steer/differential drive robots require reversing one motor to drive forward.
@@ -304,6 +315,10 @@ public class ISBotsTeleOp extends LinearOpMode {
 
             /* Changing the wrist's position */
             wrist.setPosition(wristPosition);
+            
+            if (robotUtils.isAnyColorBlock()) {
+                intakePower = INTAKE_OFF;
+            }
 
             // Changing the intake power
             intake.setPower(intakePower);
