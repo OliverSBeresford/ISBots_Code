@@ -226,7 +226,7 @@ public class RobotUtils {
         }
     }
 
-    public void navigateTo(LinearOpMode opMode, int armPosition, boolean debugEnabled) {
+    public void navigateTo(LinearOpMode opMode, int armPosition, int[] destination, boolean debugEnabled) {
         /* This function moves the robot to the blue basket
          * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
          */
@@ -235,6 +235,11 @@ public class RobotUtils {
         if (leftDrive == null || rightDrive == null || imu == null || intake == null || wrist == null || armMotor == null || aprilTagProcessor == null || visionPortal == null) {
             return;
         }
+
+        // Create variables to store the target coordinates
+        int targetX = destination[0], 
+            targetY = destination[1],
+            targetZ = destination[2];
 
         moveArm(opMode, armPosition);
 
