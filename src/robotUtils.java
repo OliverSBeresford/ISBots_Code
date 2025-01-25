@@ -27,37 +27,46 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
+import org.firstinspires.ftc.vision.opencv.ColorRange;
 
 public class RobotUtils {
 
-    private  DcMotor leftDrive = null;
-    private  DcMotor rightDrive = null;
-    private  IMU imu = null;
-    private  CRServo intake = null;
-    private  Servo wrist = null;
-    private  DcMotorEx armMotor = null;
-    private  AprilTagProcessor aprilTagProcessor = null;
-    private  VisionPortal visionPortal = null;
-    private  ColorSensor colorSensor = null;
+    private DcMotor leftDrive = null;
+    private DcMotor rightDrive = null;
+    private IMU imu = null;
+    private CRServo intake = null;
+    private Servo wrist = null;
+    private DcMotorEx armMotor = null;
+    private AprilTagProcessor aprilTagProcessor = null;
+    private VisionPortal visionPortal = null;
+    private ColorBlobLocatorProcessor blobProcessor = null;
+    private ColorSensor colorSensor = null;
     
-    private  double imuCorrection = 0.0;
+    private double imuCorrection = 0.0;
     
     // Values for detecting blocks
-    private  final int[] RED_RGB = {4000, 2000, 1200};
-    private  final int[] BLUE_RGB = {1000, 2200, 4500};
-    private  final int[] YELLOW_RGB = {6500, 8500, 2000};
-    private  final int TOLERANCE = 500;
-    private  final int colorThreshold = 500;
+    private final int[] RED_RGB = {4000, 2000, 1200};
+    private final int[] BLUE_RGB = {1000, 2200, 4500};
+    private final int[] YELLOW_RGB = {6500, 8500, 2000};
+    private final int TOLERANCE = 500;
+    private final int colorThreshold = 500;
+
+    // Vision constants
+    private final int CAMERA_RESOLUTION_WIDTH =  752;
+    private final int CAMERA_RESOLUTION_HEIGHT = 416;
+    private final int CAMERA_FOV_HORIZONTAL = 60;
 
     // Constants for pathfinding
-    public  final double[] BLUE_BASKET = {72, 72, 25.75};
-    public  final double[] RED_BASKET = {-72, -72, 25.75};
-    public  final double[] RED_HIGH_CHAMBER = {0, -24, 26};
-    public  final double[] BLUE_HIGH_CHAMBER = {0, 24, 26};
-    public  final double[] RED_ASCENT = {-24, 0, 20};
-    public  final double[] BLUE_ASCENT = {24, 0, 20};
-    public  final double[] RED_START = {72, -72, 0};
-    public  final double[] BLUE_START = {-72, 72, 0};
+    public final double[] BLUE_BASKET = {72, 72, 25.75};
+    public final double[] RED_BASKET = {-72, -72, 25.75};
+    public final double[] RED_HIGH_CHAMBER = {0, -24, 26};
+    public final double[] BLUE_HIGH_CHAMBER = {0, 24, 26};
+    public final double[] RED_ASCENT = {-24, 0, 20};
+    public final double[] BLUE_ASCENT = {24, 0, 20};
+    public final double[] RED_START = {72, -72, 0};
+    public final double[] BLUE_START = {-72, 72, 0};
+    752x416
 
     // Grid dimensions
     private final int GRID_SIZE = 6;
@@ -348,6 +357,58 @@ public class RobotUtils {
         }
     }
 
+    public void driveToBlob(LinearOpMode opMode, double targetBlobArea, double stopThreshold, boolean debugEnabled) {
+        if (imu == null || blobProcessor == null || aprilTagProcessor == null) {
+            print(opMode, "Blob processing encountered error", debugEnabled);
+        }
+
+        while (opMode.opModeIsActive()) {
+            // Get blob position and size
+            ColorBlobProcessor.Blob blob = blobProcessor.getLargestBlob();
+
+            if (blob == null) {
+                opMode.telemetry.addData("Blob Status", "No blob detected");
+                opMode.telemetry.update();
+                continue; // Skip this loop iteration if no blob is detected
+            }
+
+            // Blob properties
+            double blobX = blob.getCenterX(); // X position of the blob in pixels
+            double blobArea = blob.getArea(); // Area of the blob (size)
+
+            // Check if the blob is close enough (based on area)
+            if (blobArea >= stopThreshold * targetBlobArea) {
+                opMode.telemetry.addData("Blob Status", "Target reached");
+                opMode.telemetry.update();
+                break; // Stop moving if close enough
+            }
+
+            // Calculate horizontal angle to blob
+            double angleToBlob = ((blobX - CAMERA_RESOLUTION_WIDTH / 2.0) / CAMERA_RESOLUTION_WIDTH) * CAMERA_FOV_HORIZONTAL;
+
+            // Get current heading and compute turn angle
+            double currentHeading = imu.getHeading();
+            double targetHeading = currentHeading + angleToBlob;
+
+            // Adjust heading to stay within [-180, 180]
+            if (targetHeading > 180) targetHeading -= 360;
+            if (targetHeading < -180) targetHeading += 360;
+
+            // Turn towards the blob
+            turnToHeading(opMode, imu, targetHeading);
+
+            // Drive forward a short distance
+            driveStraight(opMode, 6, 0.3, targetHeading); // Drive 6 inches forward
+
+            // Correct position periodically using AprilTag
+            Pose3D pose = getData(opMode, aprilTagProcessor, false);
+            opMode.telemetry.addData("Position", pose.getPosition());
+            opMode.telemetry.addData("Heading", pose.getOrientation());
+            opMode.telemetry.addData("Blob Area", blobArea);
+            opMode.telemetry.update();
+        }
+    }
+
     private void turnToHeading(LinearOpMode opMode, IMU imu, double targetHeading, boolean debugEnabled) {
         double currentHeading = getYawIMU();
         double turnAngle = targetHeading - currentHeading;
@@ -435,27 +496,9 @@ public class RobotUtils {
     /* *********************** End pathfinding functions *********************** */
     
 
-    /* *********************** These functions relate to the AprilTag detection system. *********************** */
+    /* *********************** These functions relate to the Vision system. *********************** */
     public VisionComponents initAprilTag(LinearOpMode opMode) {
-        // Variables to store the position and orientation of the camera on the robot. Setting these
-        // values requires a definition of the axes of the camera and robot:
-        // Camera axes:
-        // Origin location: Center of the lens
-        // Axes orientation: +x right, +y down, +z forward (from camera's perspective)
-        // Robot axes (this is typical, but you can define this however you want):
-        // Origin location: Center of the robot at field height
-        // Axes orientation: +x right, +y forward, +z upward
-        // Position:
-        // If all values are zero (no translation), that implies the camera is at the center of the
-        // robot. Suppose your camera is positioned 5 inches to the left, 7 inches forward, and 12
-        // inches above the ground - you would need to set the position to (-5, 7, 12).
-        // Orientation:
-        // If all values are zero (no rotation), that implies the camera is pointing straight up. In
-        // most cases, you'll need to set the pitch to -90 degrees (rotation about the x-axis), meaning
-        // the camera is horizontal. Use a yaw of 0 if the camera is pointing forwards, +90 degrees if
-        // it's pointing straight left, -90 degrees for straight right, etc. You can also set the roll
-        // to +/-90 degrees if it's vertical, or 180 degrees if it's upside-down.
-        // Position(DistanceUnit unit, double x, double y, double z, long acquisitionTime)
+        // Camera position and orientation
         Position cameraPosition = new Position(DistanceUnit.CM, 5, 21.5, 18, 0);
         // YawPitchRollAngles(AngleUnit angleUnit, double yaw, double pitch, double roll, long acquisitionTime)
         YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 0, -90, 0, 0);
@@ -543,7 +586,55 @@ public class RobotUtils {
         }
         return null;
     }
-    /* *********************** End AprilTag detection functions *********************** */
+
+    public void initCamera(LinearOpMode opMode) {
+        // Camera position and orientation
+        Position cameraPosition = new Position(DistanceUnit.CM, 5, 21.5, 18, 0);
+        // YawPitchRollAngles(AngleUnit angleUnit, double yaw, double pitch, double roll, long acquisitionTime)
+        YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 0, -90, 0, 0);
+
+        AprilTagProcessor.Builder myAprilTagProcessorBuilder;
+        VisionPortal.Builder myVisionPortalBuilder;
+
+        // First, create an AprilTagProcessor.Builder.
+        myAprilTagProcessorBuilder = new AprilTagProcessor.Builder();
+        myAprilTagProcessorBuilder.setCameraPose(cameraPosition, cameraOrientation);
+        // Create an AprilTagProcessor by calling build.
+        // Create the AprilTag processor and assign it to a variable.
+        AprilTagProcessor myAprilTagProcessor = myAprilTagProcessorBuilder.build();
+
+        // Next, create a VisionPortal.Builder and set attributes related to the camera.
+        myVisionPortalBuilder = new VisionPortal.Builder();
+        // Add myAprilTagProcessor to the VisionPortal.Builder.
+        myVisionPortalBuilder.addProcessor(myAprilTagProcessor);
+    
+        // Build a "Color Locator" vision processor based on the ColorBlobLocatorProcessor class.
+        ColorBlobLocatorProcessor.Builder myColorBlobLocatorProcessorBuilder = new ColorBlobLocatorProcessor.Builder();
+        // - Specify the color range you are looking for.
+        myColorBlobLocatorProcessorBuilder.setTargetColorRange(ColorRange.BLUE);
+        // 50% width/height square centered on screen
+        myColorBlobLocatorProcessorBuilder.setRoi(ImageRegion.asUnityCenterCoordinates(-0.5, 0.5, 0.5, -0.5));
+        // - Define which contours are included.
+        myColorBlobLocatorProcessorBuilder.setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY);
+        // - Turn the display of contours ON or OFF.  Turning this on helps debugging but takes up valuable CPU time.
+        myColorBlobLocatorProcessorBuilder.setDrawContours(true);
+        // - Include any pre-processing of the image or mask before looking for Blobs.
+
+        ColorBlobLocatorProcessor myColorBlobLocatorProcessor = myColorBlobLocatorProcessorBuilder.build();
+
+        //  - Add the ColorBlobLocatorProcessor created above.
+        myVisionPortalBuilder.addProcessor(myColorBlobLocatorProcessor);
+        //  - Set the desired video resolution.
+        myVisionPortalBuilder.setCameraResolution(new Size(CAMERA_RESOLUTION_WIDTH, CAMERA_RESOLUTION_HEIGHT));
+        //  - Choose your video source. This may be for a webcam or for a Phone Camera.
+        myVisionPortalBuilder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
+
+        // Assign the AprilTagProcessor and VisionPortal to the class variables.
+        visionPortal = myVisionPortalBuilder.build();
+        aprilTagProcessor = myAprilTagProcessor;
+        blobProcessor = myColorBlobLocatorProcessor;
+    }
+    /* *********************** End Vision functions *********************** */
     
     /* *********************** Color sensing functions *********************** */
     private boolean isBlockPresent() {
@@ -589,6 +680,7 @@ public class RobotUtils {
             return;
         }
         opMode.telemetry.addLine(message);
+        opMode.telemtry.update();
     }
     /* *********************** End of telemetry helper functions *********************** */
     
@@ -596,10 +688,15 @@ public class RobotUtils {
     public static class VisionComponents {
         VisionPortal visionPortal;
         AprilTagProcessor aprilTagProcessor;
+        ColorBlobLocatorProcessor colorBlobProcessor;
 
         public VisionComponents(VisionPortal vision_portal, AprilTagProcessor apriltag_processor) {
             visionPortal = vision_portal;
             aprilTagProcessor = apriltag_processor; 
+        }
+
+        public void setBlobProcessor(ColorBlobLocatorProcessor colorBlobLocatorProcessor) {
+            colorBlobProcessor = colorBlobLocatorProcessor;
         }
     }
     /* *********************** End classes used to return specific data from the RobotUtils class *********************** */
