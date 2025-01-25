@@ -294,6 +294,7 @@ public class RobotUtils {
         opMode.sleep(10);
 
         // Perform A* pathfinding
+        print(opMode, "Going into aStar", debugEnabled);
         List<int[]> path = aStar(opMode, FIELD, start, target, debugEnabled);
 
         // Give time for robot to respond
@@ -610,6 +611,7 @@ public class RobotUtils {
         }
         opMode.telemetry.addLine(message);
     }
+    /* *********************** End of telemetry helper functions *********************** */
     
     /* *********************** Classes used to return specific data from the RobotUtils class *********************** */
     public static class VisionComponents {
