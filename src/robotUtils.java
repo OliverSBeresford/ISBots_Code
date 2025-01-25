@@ -30,41 +30,41 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 public class RobotUtils {
 
-    private static DcMotor leftDrive = null;
-    private static DcMotor rightDrive = null;
-    private static IMU imu = null;
-    private static CRServo intake = null;
-    private static Servo wrist = null;
-    private static DcMotorEx armMotor = null;
-    private static AprilTagProcessor aprilTagProcessor = null;
-    private static VisionPortal visionPortal = null;
-    private static ColorSensor colorSensor = null;
+    private  DcMotor leftDrive = null;
+    private  DcMotor rightDrive = null;
+    private  IMU imu = null;
+    private  CRServo intake = null;
+    private  Servo wrist = null;
+    private  DcMotorEx armMotor = null;
+    private  AprilTagProcessor aprilTagProcessor = null;
+    private  VisionPortal visionPortal = null;
+    private  ColorSensor colorSensor = null;
     
-    private static double imuCorrection = 0.0;
+    private  double imuCorrection = 0.0;
     
     // Values for detecting blocks
-    private static final int[] RED_RGB = {4000, 2000, 1200};
-    private static final int[] BLUE_RGB = {1000, 2200, 4500};
-    private static final int[] YELLOW_RGB = {6500, 8500, 2000};
-    private static final int TOLERANCE = 500;
-    private static final int colorThreshold = 500;
+    private  final int[] RED_RGB = {4000, 2000, 1200};
+    private  final int[] BLUE_RGB = {1000, 2200, 4500};
+    private  final int[] YELLOW_RGB = {6500, 8500, 2000};
+    private  final int TOLERANCE = 500;
+    private  final int colorThreshold = 500;
 
     // Constants for pathfinding
-    public static final double[] BLUE_BASKET = {72, 72, 25.75};
-    public static final double[] RED_BASKET = {-72, -72, 25.75};
-    public static final double[] RED_HIGH_CHAMBER = {0, -24, 26};
-    public static final double[] BLUE_HIGH_CHAMBER = {0, 24, 26};
-    public static final double[] RED_ASCENT = {-24, 0, 20};
-    public static final double[] BLUE_ASCENT = {24, 0, 20};
-    public static final double[] RED_START = {72, -72, 0};
-    public static final double[] BLUE_START = {-72, 72, 0};
+    public  final double[] BLUE_BASKET = {72, 72, 25.75};
+    public  final double[] RED_BASKET = {-72, -72, 25.75};
+    public  final double[] RED_HIGH_CHAMBER = {0, -24, 26};
+    public  final double[] BLUE_HIGH_CHAMBER = {0, 24, 26};
+    public  final double[] RED_ASCENT = {-24, 0, 20};
+    public  final double[] BLUE_ASCENT = {24, 0, 20};
+    public  final double[] RED_START = {72, -72, 0};
+    public  final double[] BLUE_START = {-72, 72, 0};
 
     // Grid dimensions
-    private static final int GRID_SIZE = 6;
-    private static final double CELL_SIZE = 24.0; // Inches
+    private  final int GRID_SIZE = 6;
+    private  final double CELL_SIZE = 24.0; // Inches
 
     // Define the 6x6 grid. 1 = obstacle, 0 = traversable
-    private static final int[][] FIELD = {
+    private final int[][] FIELD = {
         {0, 0, 0, 0, 0, 0},
         {1, 0, 0, 0, 0, 1},
         {0, 0, 1, 1, 0, 0},
@@ -104,7 +104,7 @@ public class RobotUtils {
     /* *********************** End initialization functions *********************** */
 
     /* *********************** These functions relate to physical behaior of the robot *********************** */
-    public static void turnDegrees(LinearOpMode opMode, double turnAngle, boolean debugEnabled) {
+    public  void turnDegrees(LinearOpMode opMode, double turnAngle, boolean debugEnabled) {
         /* This function turn the robot a certain number of degrees
          * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
          *             double turnAngle - The number of degrees to turn the robot.
@@ -348,7 +348,7 @@ public class RobotUtils {
         }
     }
 
-    private static void turnToHeading(LinearOpMode opMode, IMU imu, double targetHeading, boolean debugEnabled) {
+    private void turnToHeading(LinearOpMode opMode, IMU imu, double targetHeading, boolean debugEnabled) {
         double currentHeading = getYawIMU();
         double turnAngle = targetHeading - currentHeading;
 
@@ -358,13 +358,13 @@ public class RobotUtils {
         turnDegrees(opMode, turnAngle, debugEnabled);
     }
 
-    private static void setYawIMU(double yaw) {
+    private  void setYawIMU(double yaw) {
         if (imu != null) {
             imuCorrection = yaw - imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         }
     }
 
-    private static double getYawIMU() {
+    private  double getYawIMU() {
         if (imu != null) {
             return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) + imuCorrection;
         }
@@ -374,25 +374,37 @@ public class RobotUtils {
     /* *********************** End robot physical behavior functions *********************** */
 
     /* *********************** These functions relate to pathfinding *********************** */
-    private static int[] fieldToGrid(double x, double y) {
+    private int[] fieldToGrid(double x, double y) {
         // Assuming the bottom left corner corresponds to the coordinates (-72, -72)
         int col = (int) Math.floor((x + 72) / CELL_SIZE);
         int row = (int) Math.floor((144 - (y + 72)) / CELL_SIZE);
         return new int[]{row, col};
     }
 
-    private static double[] gridToField(int row, int col) {
+    private double[] gridToField(int row, int col) {
         double x = (col - 3) * CELL_SIZE + CELL_SIZE / 2;
         double y = (3 - row) * CELL_SIZE - CELL_SIZE / 2;
         return new double[]{x, y};
     }
 
-    private static List<int[]> aStar(LinearOpMode opMode, int[][] grid, int[] start, int[] goal, boolean debugEnabled) {
+    private List<int[]> aStar(LinearOpMode opMode, int[][] grid, int[] start, int[] goal, boolean debugEnabled) {
+        if (debugEnabled) {
+            opMode.telemetry.addLine("Inside of aStar");
+            opMode.telemetry.update();
+        }
+        
         int iterations = 0;
+
+        print(opMode, "Heuristic: " + heuristic(start, goal), debugEnabled);
 
         PriorityQueue<Node2> openSet = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fCost));
         Set<String> closedSet = new HashSet<>();
         openSet.add(new Node2(start, null, 0, heuristic(start, goal)));
+        
+        if (debugEnabled) {
+            opMode.telemetry.addLine("Made priority queue and set");
+            opMode.telemetry.update();
+        }
 
         while (!openSet.isEmpty()) {
             iterations += 1;
@@ -423,16 +435,16 @@ public class RobotUtils {
         return null; // No path found
     }
 
-    private static boolean isValid(int[] pos, int[][] grid) {
+    private boolean isValid(int[] pos, int[][] grid) {
         int row = pos[0], col = pos[1];
         return row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE && grid[row][col] == 0;
     }
 
-    private static double heuristic(int[] a, int[] b) {
+    private double heuristic(int[] a, int[] b) {
         return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
     }
 
-    private static List<int[]> reconstructPath(Node2 node) {
+    private List<int[]> reconstructPath(Node2 node) {
         List<int[]> path = new ArrayList<>();
         while (node != null) {
             path.add(node.position);
@@ -589,6 +601,14 @@ public class RobotUtils {
     
     private boolean isWithinRange(int actual, int target, int tolerance) {
         return Math.abs(actual - target) <= tolerance;
+    }
+
+    /* *********************** Telemetry helper functions *********************** */
+    private void print(LinearOpMode opMode, String message, boolean debugEnabled) {
+        if (!debugEnabled) {
+            return;
+        }
+        opMode.telemetry.addLine(message);
     }
     
     /* *********************** Classes used to return specific data from the RobotUtils class *********************** */
