@@ -47,16 +47,17 @@ public class RobotUtils {
     private static final int[] BLUE_RGB = {1000, 2200, 4500};
     private static final int[] YELLOW_RGB = {6500, 8500, 2000};
     private static final int TOLERANCE = 500;
+    private static final int colorThreshold = 500;
 
     // Constants for pathfinding
-    public static final int[] BLUE_BASKET = {72, 72, 25.75};
-    public static final int[] RED_BASKET = {-72, -72, 25.75};
-    public static final int[] RED_HIGH_CHAMBER = {0, -24, 26};
-    public static final int[] BLUE_HIGH_CHAMBER = {0, 24, 26};
-    public static final int[] RED_ASCENT = {-24, 0, 20};
-    public static final int[] BLUE_ASCENT = {24, 0, 20};
-    public static final int[] RED_START = {72, -72, 0};
-    public static final int[] BLUE_START = {-72, 72, 0};
+    public static final double[] BLUE_BASKET = {72, 72, 25.75};
+    public static final double[] RED_BASKET = {-72, -72, 25.75};
+    public static final double[] RED_HIGH_CHAMBER = {0, -24, 26};
+    public static final double[] BLUE_HIGH_CHAMBER = {0, 24, 26};
+    public static final double[] RED_ASCENT = {-24, 0, 20};
+    public static final double[] BLUE_ASCENT = {24, 0, 20};
+    public static final double[] RED_START = {72, -72, 0};
+    public static final double[] BLUE_START = {-72, 72, 0};
 
     // Grid dimensions
     private static final int GRID_SIZE = 6;
@@ -240,7 +241,7 @@ public class RobotUtils {
         }
     }
 
-    public void navigateTo(LinearOpMode opMode, int armPosition, int[] destination, int[] origin, boolean debugEnabled) {
+    public void navigateTo(LinearOpMode opMode, int armPosition, double[] destination, double[] origin, boolean debugEnabled) {
         /* This function moves the robot to the blue basket
          * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
          */
@@ -251,7 +252,7 @@ public class RobotUtils {
         }
 
         // Create variables to store the target coordinates
-        int targetX = destination[0], 
+        double targetX = destination[0], 
             targetY = destination[1],
             targetZ = destination[2];
 
