@@ -177,7 +177,7 @@ public class Put extends LinearOpMode {
     // Helper functions
 
     private void moveForward(double power, double distance) {
-        robotUtils.driveStraight(this, distance, power, distance);
+        robotUtils.driveStraight(this, distance, power, distance, true);
     }
 
     private void moveBackward(double power, long duration) {
@@ -272,7 +272,7 @@ public class Put extends LinearOpMode {
 
     private void turnLeft(double degrees) {
         // Use the turnDegrees function to turn left using the IMU
-        robotUtils.turnDegrees(this, degrees);
+        robotUtils.turnDegrees(this, degrees, true);
         telemetry.addData("Turning left", "%d degrees", degrees);
         telemetry.update();
         sleep(10); // Placeholder
@@ -280,7 +280,7 @@ public class Put extends LinearOpMode {
 
     private void turnRight(double degrees) {
         // Use the turnDegrees function to turn right using the IMU
-        robotUtils.turnDegrees(this, degrees);
+        robotUtils.turnDegrees(this, degrees, true);
         telemetry.addData("Turning right", "%d degrees", degrees);
         telemetry.update();
         sleep(10); // Placeholder

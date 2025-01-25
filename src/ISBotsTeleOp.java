@@ -134,7 +134,7 @@ public class ISBotsTeleOp extends LinearOpMode {
 
         // Initialize the robot utility class to have access to useful methods
         robotUtils = new RobotUtils();
-        robotUtils.setHardware(leftDrive, rightDrive, imu, intake, wrist, armMotor);
+        robotUtils.setHardware(leftDrive, rightDrive, imu, intake, wrist, (DcMotorEx) armMotor);
         robotUtils.setColorSensor(colorSensor);
 
 
