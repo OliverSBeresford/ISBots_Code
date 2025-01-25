@@ -302,7 +302,10 @@ public class RobotUtils {
 
         // Perform bfs pathfinding
         print(opMode, "Going into bfs", debugEnabled);
-        LinkedList<int[]> path = bfs(FIELD, start, target);
+        LinkedList<int[]> path = bfs(opMode, FIELD, start, target, debugEnabled);
+        if (path == null) {
+            print(opMode, "Path was null", debugEnabled);
+        }
 
         // Give time for robot to respond
         opMode.sleep(10);
@@ -445,10 +448,10 @@ public class RobotUtils {
     /* *********************** These functions relate to pathfinding *********************** */
     private int[] fieldToGrid(double x, double y) {
         // Normalize x and y to grid space
-        int col = (int) Math.floor((x + MAP_SIZE / 2) / CELL_SIZE);
-        int row = (int) Math.floor((MAP_SIZE / 2 - y) / CELL_SIZE); // Y decreases downward
+        int col = (int) Math.floor(((x + MAP_SIZE / 2) / CELL_SIZE) - (x > 0 ? 1e-9 : 0));
+        int row = (int) Math.floor(((MAP_SIZE / 2 - y) / CELL_SIZE) - (y > 0 ? 1e-9 : 0)); // Y decreases downward
         return new int[]{row, col};
-    }    
+    }     
 
     private double[] gridToField(int row, int col) {
         double x = col * CELL_SIZE - MAP_SIZE / 2 + CELL_SIZE / 2; // Add CELL_SIZE/2 for cell center
@@ -456,7 +459,13 @@ public class RobotUtils {
         return new double[]{x, y};
     }    
 
-    private LinkedList<int[]> bfs(int[][] grid, int[] start, int[] target) {
+    private LinkedList<int[]> bfs(LinearOpMode opMode, int[][] grid, int[] start, int[] target, boolean debugEnabled) {
+        if (!isValid(start[0], start[1], grid, new boolean[GRID_SIZE][GRID_SIZE]) || !isValid(target[0], target[1], grid, new boolean[GRID_SIZE][GRID_SIZE])) {
+            print(opMode, "Invalid start or target coordinates + " + start[0] + start[1] + target[0] + target[1], debugEnabled);
+            return null;
+        }
+
+
         int[][] directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
         boolean[][] visited = new boolean[GRID_SIZE][GRID_SIZE];
         Queue<int[]> queue = new LinkedList<>();
@@ -499,7 +508,7 @@ public class RobotUtils {
 
     private boolean isValid(int row, int col, int[][] grid, boolean[][] visited) {
         return row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE && grid[row][col] == 0 && !visited[row][col];
-    }
+    }    
 
     /* *********************** End pathfinding functions *********************** */
     
