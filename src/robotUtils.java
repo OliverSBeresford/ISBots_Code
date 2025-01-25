@@ -60,8 +60,8 @@ public class RobotUtils {
     public  final double[] BLUE_START = {-72, 72, 0};
 
     // Grid dimensions
-    private  final int GRID_SIZE = 6;
-    private  final double CELL_SIZE = 24.0; // Inches
+    private final int GRID_SIZE = 6;
+    private final double CELL_SIZE = 24.0; // Inches
 
     // Define the 6x6 grid. 1 = obstacle, 0 = traversable
     private final int[][] FIELD = {
@@ -249,10 +249,10 @@ public class RobotUtils {
         /* This function moves the robot to the blue basket
          * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
          */
-        opMode.telemetry.setMsTransmissionInterval(20);
 
         // Making sure hardware is initialized
         if (leftDrive == null || rightDrive == null || imu == null || intake == null || wrist == null || armMotor == null || aprilTagProcessor == null || visionPortal == null) {
+            print(opMode, "Hardware is null", debugEnabled);
             return;
         }
 
@@ -278,10 +278,14 @@ public class RobotUtils {
         // Drive to the blue basket
         // Convert field coordinates to grid indices
         int[] start = fieldToGrid(origin[0], origin[1]);
+
+        // Making start coordinates where we are according to apriltags
         if (currentPose != null) {
             start = fieldToGrid(currentPose.getPosition().x, currentPose.getPosition().y);
             setYawIMU(currentPose.getOrientation().getYaw(AngleUnit.DEGREES));
         }
+
+        // Target grid coordinates
         int[] target = fieldToGrid(targetX, targetY);
 
         print(opMode, "Calculated grid. Starting pathfinding", debugEnabled);
@@ -290,8 +294,8 @@ public class RobotUtils {
         opMode.sleep(50);
 
         // Perform A* pathfinding
-        print(opMode, "Going into aStar", debugEnabled);
-        List<int[]> path = aStar(opMode, FIELD, start, target, debugEnabled);
+        print(opMode, "Going into bfs", debugEnabled);
+        LinkedList<int[]> path = bfs(FIELD, start, target);
 
         // Give time for robot to respond
         opMode.sleep(10);
@@ -313,12 +317,9 @@ public class RobotUtils {
         int[] next;
 
         // Follow the path
-        for (int i = 1; i < path.size(); i++) {
-            intake.setPower(0);
-
-            current = path.get(i - 1);
-            next = path.get(i);
-
+        int[] previous = start;
+        for (int[] current : path) {
+            nextField = gridToField(previous[0], previous[1]);
             // Calculate direction and distance
             if (currentPose == null) {
                 currentField = gridToField(current[0], current[1]);
@@ -326,22 +327,24 @@ public class RobotUtils {
                 currentField = new double[]{currentPose.getPosition().x, currentPose.getPosition().y};
                 setYawIMU(currentPose.getOrientation().getYaw(AngleUnit.DEGREES));
             }
-            nextField = gridToField(next[0], next[1]);
 
-            dx = nextField[0] - currentField[0];
-            dy = nextField[1] - currentField[1];
+            // Calculate movement
+            dx = currentField[0] - nextField[0];
+            dy = currentField[1] - nextField[1];
             distance = Math.hypot(dx, dy);
             targetHeading = Math.toDegrees(Math.atan2(dy, dx));
 
             // Turn and move
-            turnToHeading(opMode, imu, targetHeading, debugEnabled);
-            driveStraight(opMode, distance, 0.5, targetHeading, debugEnabled);
+            turnToHeading(opMode, imu, targetHeading, true);
+            driveStraight(opMode, distance, 0.5, targetHeading, true);
 
-            // Correct position periodically
+            // Periodically correct using AprilTag
             currentPose = getData(opMode, aprilTagProcessor, false);
             opMode.telemetry.addData("Position", currentPose.getPosition());
             opMode.telemetry.addData("Heading", currentPose.getOrientation());
             opMode.telemetry.update();
+
+            previous = current;
         }
     }
 
@@ -384,48 +387,28 @@ public class RobotUtils {
         return new double[]{x, y};
     }
 
-    private List<int[]> aStar(LinearOpMode opMode, int[][] grid, int[] start, int[] goal, boolean debugEnabled) {
-        print(opMode, "Inside of aStar", debugEnabled);
+    private LinkedList<int[]> bfs(int[][] grid, int[] start, int[] target) {
+        int[][] directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+        boolean[][] visited = new boolean[GRID_SIZE][GRID_SIZE];
+        Queue<int[]> queue = new LinkedList<>();
+        int[][] parent = new int[GRID_SIZE][GRID_SIZE]; // Track paths
 
-        opMode.sleep(50);
-        
-        int iterations = 0;
+        queue.add(start);
+        visited[start[0]][start[1]] = true;
 
-        print(opMode, "Heuristic: " + heuristic(start, goal), debugEnabled);
-
-        opMode.sleep(50);
-
-        PriorityQueue<Node2> openSet = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fCost));
-        Set<String> closedSet = new HashSet<>();
-        openSet.add(new Node2(start, null, 0, heuristic(start, goal)));
-        
-        if (debugEnabled) {
-            opMode.telemetry.addLine("Made priority queue and set");
-            opMode.telemetry.update();
-        }
-
-        while (!openSet.isEmpty()) {
-            iterations += 1;
-
-            if (debugEnabled) {
-                opMode.telemetry.addLine("Iteration: " + iterations);
-                opMode.telemetry.update();
+        while (!queue.isEmpty()) {
+            int[] current = queue.poll();
+            if (current[0] == target[0] && current[1] == target[1]) {
+                return reconstructPath(parent, start, target);
             }
 
-            Node2 current = openSet.poll();
-            int[] pos = current.position;
-
-            if (Arrays.equals(pos, goal)) return reconstructPath(current);
-
-            closedSet.add(Arrays.toString(pos));
-
-            for (int[] dir : new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}}) {
-                int[] neighbor = {pos[0] + dir[0], pos[1] + dir[1]};
-
-                if (isValid(neighbor, grid) && !closedSet.contains(Arrays.toString(neighbor))) {
-                    double gCost = current.gCost + 1;
-                    double hCost = heuristic(neighbor, goal);
-                    openSet.add(new Node2(neighbor, current, gCost, gCost + hCost));
+            for (int[] dir : directions) {
+                int newRow = current[0] + dir[0];
+                int newCol = current[1] + dir[1];
+                if (isValid(newRow, newCol, grid, visited)) {
+                    queue.add(new int[]{newRow, newCol});
+                    visited[newRow][newCol] = true;
+                    parent[newRow][newCol] = current[0] * GRID_SIZE + current[1];
                 }
             }
         }
@@ -433,24 +416,22 @@ public class RobotUtils {
         return null; // No path found
     }
 
-    private boolean isValid(int[] pos, int[][] grid) {
-        int row = pos[0], col = pos[1];
-        return row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE && grid[row][col] == 0;
-    }
-
-    private double heuristic(int[] a, int[] b) {
-        return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
-    }
-
-    private List<int[]> reconstructPath(Node2 node) {
-        List<int[]> path = new ArrayList<>();
-        while (node != null) {
-            path.add(node.position);
-            node = node.parent;
+    private LinkedList<int[]> reconstructPath(int[][] parent, int[] start, int[] target) {
+        LinkedList<int[]> path = new LinkedList<>();
+        int current = target[0] * GRID_SIZE + target[1];
+        while (current != start[0] * GRID_SIZE + start[1]) {
+            int row = current / GRID_SIZE;
+            int col = current % GRID_SIZE;
+            path.addFirst(new int[]{row, col});
+            current = parent[row][col];
         }
-        Collections.reverse(path);
         return path;
     }
+
+    private boolean isValid(int row, int col, int[][] grid, boolean[][] visited) {
+        return row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE && grid[row][col] == 0 && !visited[row][col];
+    }
+
     /* *********************** End pathfinding functions *********************** */
     
 
@@ -619,18 +600,6 @@ public class RobotUtils {
         public VisionComponents(VisionPortal vision_portal, AprilTagProcessor apriltag_processor) {
             visionPortal = vision_portal;
             aprilTagProcessor = apriltag_processor; 
-        }
-    }
-    private static class Node2 {
-        int[] position;
-        Node2 parent;
-        double gCost, fCost;
-
-        Node2(int[] position, Node2 parent, double gCost, double fCost) {
-            this.position = position;
-            this.parent = parent;
-            this.gCost = gCost;
-            this.fCost = fCost;
         }
     }
     /* *********************** End classes used to return specific data from the RobotUtils class *********************** */
