@@ -175,7 +175,7 @@ public class TestDistance extends LinearOpMode {
         while (opModeIsActive()) {
             if (gamepad1.x) {
                 imu.resetYaw();
-                robotUtils.driveStraight(this, 10, 0.5, 0);
+                robotUtils.driveStraight(this, 10, 0.5, 0, true);
             }
 
             /* Check to see if our arm is over the current limit, and report via telemetry. */
