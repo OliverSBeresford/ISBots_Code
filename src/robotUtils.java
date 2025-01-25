@@ -214,6 +214,9 @@ public class RobotUtils {
             double correction = error * 0.02; // Proportional constant
             leftDrive.setPower(power + correction);
             rightDrive.setPower(power - correction);
+
+            // Allow time for motors to respond
+            opMode.sleep(10);
         }
 
         leftDrive.setPower(0);
@@ -238,6 +241,7 @@ public class RobotUtils {
         armMotor.setVelocity(2100);
         while (armMotor.isBusy() && opMode.opModeIsActive()) {
             // Wait for the arm to reach the position
+            opMode.sleep(10);
         }
     }
 
@@ -286,8 +290,14 @@ public class RobotUtils {
             opMode.telemetry.update();
         }
 
+        // Give time for robot to respond
+        opMode.sleep(10);
+
         // Perform A* pathfinding
         List<int[]> path = aStar(opMode, FIELD, start, target, debugEnabled);
+
+        // Give time for robot to respond
+        opMode.sleep(10);
 
         if (path == null) {
             opMode.telemetry.addData("Error", "No path found.");
