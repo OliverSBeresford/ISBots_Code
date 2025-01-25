@@ -1,13 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import java.util.List;
-import java.util.Comparator;
-import java.util.PriorityQueue;
-import java.util.HashSet;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.Queue;
+import org.firstinspires.ftc.vision.opencv.ImageRegion;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -29,6 +25,8 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
 import org.firstinspires.ftc.vision.opencv.ColorRange;
+import org.opencv.core.RotatedRect;
+import android.util.Size;
 
 public class RobotUtils {
 
@@ -66,10 +64,10 @@ public class RobotUtils {
     public final double[] BLUE_ASCENT = {24, 0, 20};
     public final double[] RED_START = {72, -72, 0};
     public final double[] BLUE_START = {-72, 72, 0};
-    752x416
 
     // Grid dimensions
     private final int GRID_SIZE = 6;
+    private final double MAP_SIZE = 144.0;
     private final double CELL_SIZE = 24.0; // Inches
 
     // Define the 6x6 grid. 1 = obstacle, 0 = traversable
@@ -322,7 +320,6 @@ public class RobotUtils {
         double dy;
         double distance;
         double targetHeading;
-        int[] current;
         int[] next;
 
         // Follow the path
@@ -344,11 +341,11 @@ public class RobotUtils {
             targetHeading = Math.toDegrees(Math.atan2(dy, dx));
 
             // Turn and move
-            turnToHeading(opMode, imu, targetHeading, true);
-            driveStraight(opMode, distance, 0.5, targetHeading, true);
+            turnToHeading(opMode, imu, targetHeading, debugEnabled);
+            driveStraight(opMode, distance, 0.5, targetHeading, debugEnabled);
 
             // Periodically correct using AprilTag
-            currentPose = getData(opMode, aprilTagProcessor, false);
+            currentPose = getData(opMode, aprilTagProcessor, debugEnabled);
             opMode.telemetry.addData("Position", currentPose.getPosition());
             opMode.telemetry.addData("Heading", currentPose.getOrientation());
             opMode.telemetry.update();
@@ -364,7 +361,18 @@ public class RobotUtils {
 
         while (opMode.opModeIsActive()) {
             // Get blob position and size
-            ColorBlobProcessor.Blob blob = blobProcessor.getLargestBlob();
+            ColorBlobLocatorProcessor.Blob blob = null;
+            List<ColorBlobLocatorProcessor.Blob> myBlobs = blobProcessor.getBlobs();
+            RotatedRect myBoxFit;
+            ColorBlobLocatorProcessor.Util.filterByArea(50, 20000, myBlobs);
+            
+            // Display the size (area) and center location for each Blob.
+            for (ColorBlobLocatorProcessor.Blob myBlob : myBlobs) {
+                blob = myBlob;
+                break;
+            }
+            // Get a "best-fit" bounding box (called "boxFit", of type RotatedRect) for this blob.
+            myBoxFit = blob.getBoxFit();
 
             if (blob == null) {
                 opMode.telemetry.addData("Blob Status", "No blob detected");
@@ -373,8 +381,8 @@ public class RobotUtils {
             }
 
             // Blob properties
-            double blobX = blob.getCenterX(); // X position of the blob in pixels
-            double blobArea = blob.getArea(); // Area of the blob (size)
+            double blobX = myBoxFit.center.x; // X position of the blob in pixels
+            double blobArea = blob.getContourArea(); // Area of the blob (size)
 
             // Check if the blob is close enough (based on area)
             if (blobArea >= stopThreshold * targetBlobArea) {
@@ -387,7 +395,7 @@ public class RobotUtils {
             double angleToBlob = ((blobX - CAMERA_RESOLUTION_WIDTH / 2.0) / CAMERA_RESOLUTION_WIDTH) * CAMERA_FOV_HORIZONTAL;
 
             // Get current heading and compute turn angle
-            double currentHeading = imu.getHeading();
+            double currentHeading = getYawIMU();
             double targetHeading = currentHeading + angleToBlob;
 
             // Adjust heading to stay within [-180, 180]
@@ -395,13 +403,13 @@ public class RobotUtils {
             if (targetHeading < -180) targetHeading += 360;
 
             // Turn towards the blob
-            turnToHeading(opMode, imu, targetHeading);
+            turnToHeading(opMode, imu, targetHeading, debugEnabled);
 
             // Drive forward a short distance
-            driveStraight(opMode, 6, 0.3, targetHeading); // Drive 6 inches forward
+            driveStraight(opMode, 6, 0.3, targetHeading, debugEnabled); // Drive 6 inches forward
 
             // Correct position periodically using AprilTag
-            Pose3D pose = getData(opMode, aprilTagProcessor, false);
+            Pose3D pose = getData(opMode, aprilTagProcessor, debugEnabled);
             opMode.telemetry.addData("Position", pose.getPosition());
             opMode.telemetry.addData("Heading", pose.getOrientation());
             opMode.telemetry.addData("Blob Area", blobArea);
@@ -436,17 +444,17 @@ public class RobotUtils {
 
     /* *********************** These functions relate to pathfinding *********************** */
     private int[] fieldToGrid(double x, double y) {
-        // Assuming the bottom left corner corresponds to the coordinates (-72, -72)
-        int col = (int) Math.floor((x + 72) / CELL_SIZE);
-        int row = (int) Math.floor((144 - (y + 72)) / CELL_SIZE);
+        // Normalize x and y to grid space
+        int col = (int) Math.floor((x + MAP_SIZE / 2) / CELL_SIZE);
+        int row = (int) Math.floor((MAP_SIZE / 2 - y) / CELL_SIZE); // Y decreases downward
         return new int[]{row, col};
-    }
+    }    
 
     private double[] gridToField(int row, int col) {
-        double x = (col - 3) * CELL_SIZE + CELL_SIZE / 2;
-        double y = (3 - row) * CELL_SIZE - CELL_SIZE / 2;
+        double x = col * CELL_SIZE - MAP_SIZE / 2 + CELL_SIZE / 2; // Add CELL_SIZE/2 for cell center
+        double y = MAP_SIZE / 2 - row * CELL_SIZE - CELL_SIZE / 2; // Subtract CELL_SIZE/2 for cell center
         return new double[]{x, y};
-    }
+    }    
 
     private LinkedList<int[]> bfs(int[][] grid, int[] start, int[] target) {
         int[][] directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
@@ -627,7 +635,7 @@ public class RobotUtils {
         //  - Set the desired video resolution.
         myVisionPortalBuilder.setCameraResolution(new Size(CAMERA_RESOLUTION_WIDTH, CAMERA_RESOLUTION_HEIGHT));
         //  - Choose your video source. This may be for a webcam or for a Phone Camera.
-        myVisionPortalBuilder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
+        myVisionPortalBuilder.setCamera(opMode.hardwareMap.get(WebcamName.class, "Webcam 1"));
 
         // Assign the AprilTagProcessor and VisionPortal to the class variables.
         visionPortal = myVisionPortalBuilder.build();
@@ -680,7 +688,7 @@ public class RobotUtils {
             return;
         }
         opMode.telemetry.addLine(message);
-        opMode.telemtry.update();
+        opMode.telemetry.update();
     }
     /* *********************** End of telemetry helper functions *********************** */
     
