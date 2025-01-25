@@ -249,6 +249,7 @@ public class RobotUtils {
         /* This function moves the robot to the blue basket
          * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
          */
+        opMode.telemetry.setMsTransmissionInterval(20);
 
         // Making sure hardware is initialized
         if (leftDrive == null || rightDrive == null || imu == null || intake == null || wrist == null || armMotor == null || aprilTagProcessor == null || visionPortal == null) {
@@ -262,19 +263,17 @@ public class RobotUtils {
 
         moveArm(opMode, armPosition);
 
-        if (debugEnabled) {
-            opMode.telemetry.addLine("Moved arm. Proceeding.");
-            opMode.telemetry.update();
-        }
+        print(opMode, "Moved arm. Proceeding", debugEnabled);
+
+        opMode.sleep(50);
 
         Pose3D currentPose;
 
         currentPose = getData(opMode, aprilTagProcessor, debugEnabled);
 
-        if (debugEnabled) {
-            opMode.telemetry.addLine("Got data. Making grid.");
-            opMode.telemetry.update();
-        }
+        print(opMode, "Got data. Making grid", debugEnabled);
+
+        opMode.sleep(50);
 
         // Drive to the blue basket
         // Convert field coordinates to grid indices
@@ -285,13 +284,10 @@ public class RobotUtils {
         }
         int[] target = fieldToGrid(targetX, targetY);
 
-        if (debugEnabled) {
-            opMode.telemetry.addLine("Calculated grid. Starting pathfinding.");
-            opMode.telemetry.update();
-        }
+        print(opMode, "Calculated grid. Starting pathfinding", debugEnabled);
 
         // Give time for robot to respond
-        opMode.sleep(10);
+        opMode.sleep(50);
 
         // Perform A* pathfinding
         print(opMode, "Going into aStar", debugEnabled);
@@ -389,14 +385,15 @@ public class RobotUtils {
     }
 
     private List<int[]> aStar(LinearOpMode opMode, int[][] grid, int[] start, int[] goal, boolean debugEnabled) {
-        if (debugEnabled) {
-            opMode.telemetry.addLine("Inside of aStar");
-            opMode.telemetry.update();
-        }
+        print(opMode, "Inside of aStar", debugEnabled);
+
+        opMode.sleep(50);
         
         int iterations = 0;
 
         print(opMode, "Heuristic: " + heuristic(start, goal), debugEnabled);
+
+        opMode.sleep(50);
 
         PriorityQueue<Node2> openSet = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fCost));
         Set<String> closedSet = new HashSet<>();
@@ -516,6 +513,7 @@ public class RobotUtils {
          *             AprilTagProcessor myAprilTagProcessor - The AprilTagProcessor object that is used to detect AprilTags.
          *             bool debugEnabled - Whether or not to print debug information.
         */
+        print(opMode, "Getting data.", debugEnabled);
 
         List<AprilTagDetection> myAprilTagDetections;
         AprilTagDetection myAprilTagDetection;
