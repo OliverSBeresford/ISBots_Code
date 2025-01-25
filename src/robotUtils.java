@@ -293,7 +293,7 @@ public class RobotUtils {
         // Give time for robot to respond
         opMode.sleep(50);
 
-        // Perform A* pathfinding
+        // Perform bfs pathfinding
         print(opMode, "Going into bfs", debugEnabled);
         LinkedList<int[]> path = bfs(FIELD, start, target);
 
