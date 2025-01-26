@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import org.firstinspires.ftc.teamcode.RobotUtils;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -140,7 +141,7 @@ public class ISBotsTeleOp extends LinearOpMode {
         robotUtils = new RobotUtils();
         robotUtils.setHardware(leftDrive, rightDrive, imu, intake, wrist, (DcMotorEx) armMotor);
         robotUtils.setColorSensor(colorSensor);
-        robotUtils.initAprilTag();
+        robotUtils.initAprilTag(this);
 
         /* Most skid-steer/differential drive robots require reversing one motor to drive forward.
         for this robot, we reverse the right motor.*/
@@ -247,8 +248,8 @@ public class ISBotsTeleOp extends LinearOpMode {
                 }
             }
             // If you click the left joystick you'll go to the red basket
-            if (gamepad1.LeftStickButton && !lastLStickState) {
-                position = robotUtils.getData(this, robotUtils.aprilTagProcessor);
+            if (gamepad1.left_stick_button && !lastLStickState) {
+                position = robotUtils.getData(this, robotUtils.aprilTagProcessor, true);
                 if (position != null) {
                     coordinates = new double[]{position.getPosition().x, position.getPosition().y, position.getPosition().z};
                     robotUtils.navigateTo(this, (int) armPosition, coordinates, robotUtils.RED_BASKET, 0, true);
@@ -258,7 +259,7 @@ public class ISBotsTeleOp extends LinearOpMode {
             lastAState = gamepad1.a;
             lastBState = gamepad1.b;
             lastXState = gamepad1.x;
-            lastLStickState = gamepad1.LeftStickButton;
+            lastLStickState = gamepad1.left_stick_button;
 
             /* Arm control */
             if(gamepad1.right_bumper) {
