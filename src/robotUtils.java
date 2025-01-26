@@ -30,30 +30,30 @@ import android.util.Size;
 
 public class RobotUtils {
 
-    private DcMotor leftDrive = null;
-    private DcMotor rightDrive = null;
-    private IMU imu = null;
-    private CRServo intake = null;
-    private Servo wrist = null;
-    private DcMotorEx armMotor = null;
-    private AprilTagProcessor aprilTagProcessor = null;
-    private VisionPortal visionPortal = null;
-    private ColorBlobLocatorProcessor blobProcessor = null;
-    private ColorSensor colorSensor = null;
+    public DcMotor leftDrive = null;
+    public DcMotor rightDrive = null;
+    public IMU imu = null;
+    public CRServo intake = null;
+    public Servo wrist = null;
+    public DcMotorEx armMotor = null;
+    public AprilTagProcessor aprilTagProcessor = null;
+    public VisionPortal visionPortal = null;
+    public ColorBlobLocatorProcessor blobProcessor = null;
+    public ColorSensor colorSensor = null;
     
-    private double imuCorrection = 0.0;
+    public double imuCorrection = 0.0;
     
     // Values for detecting blocks
-    private final int[] RED_RGB = {4000, 2000, 1200};
-    private final int[] BLUE_RGB = {1000, 2200, 4500};
-    private final int[] YELLOW_RGB = {6500, 8500, 2000};
-    private final int TOLERANCE = 500;
-    private final int colorThreshold = 500;
+    public final int[] RED_RGB = {4000, 2000, 1200};
+    public final int[] BLUE_RGB = {1000, 2200, 4500};
+    public final int[] YELLOW_RGB = {6500, 8500, 2000};
+    public final int TOLERANCE = 500;
+    public final int colorThreshold = 500;
 
     // Vision constants
-    private final int CAMERA_RESOLUTION_WIDTH =  640;
-    private final int CAMERA_RESOLUTION_HEIGHT = 480;
-    private final int CAMERA_FOV_HORIZONTAL = 60;
+    public final int CAMERA_RESOLUTION_WIDTH =  640;
+    public final int CAMERA_RESOLUTION_HEIGHT = 480;
+    public final int CAMERA_FOV_HORIZONTAL = 60;
 
     // Constants for pathfinding
     public final double[] BLUE_BASKET = {72, 72, 25.75};
@@ -66,12 +66,12 @@ public class RobotUtils {
     public final double[] BLUE_OBSERVATION = {-72, 72, 0};
 
     // Grid dimensions
-    private final int GRID_SIZE = 6;
-    private final double MAP_SIZE = 144.0;
-    private final double CELL_SIZE = 24.0; // Inches
+    public final int GRID_SIZE = 6;
+    public final double MAP_SIZE = 144.0;
+    public final double CELL_SIZE = 24.0; // Inches
 
     // Define the 6x6 grid. 1 = obstacle, 0 = traversable
-    private final int[][] FIELD = {
+    public final int[][] FIELD = {
         {0, 0, 0, 0, 0, 0},
         {1, 0, 0, 0, 0, 1},
         {0, 0, 1, 1, 0, 0},
@@ -239,7 +239,7 @@ public class RobotUtils {
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    private void moveArm(LinearOpMode opMode, int position) {
+    public void moveArm(LinearOpMode opMode, int position) {
         /* This function moves the arm to a specific position
          * Parameters: int position - The position to move the arm to.
          */
@@ -417,7 +417,7 @@ public class RobotUtils {
     }
     
 
-    private void turnToHeading(LinearOpMode opMode, IMU imu, double targetHeading, boolean debugEnabled) {
+    public void turnToHeading(LinearOpMode opMode, IMU imu, double targetHeading, boolean debugEnabled) {
         double currentHeading = getYawIMU();
         double turnAngle = targetHeading - currentHeading;
 
@@ -427,13 +427,13 @@ public class RobotUtils {
         turnDegrees(opMode, turnAngle, debugEnabled);
     }
 
-    private  void setYawIMU(double yaw) {
+    public void setYawIMU(double yaw) {
         if (imu != null) {
             imuCorrection = yaw - imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         }
     }
 
-    private  double getYawIMU() {
+    public double getYawIMU() {
         if (imu != null) {
             return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) + imuCorrection;
         }
@@ -699,7 +699,6 @@ public class RobotUtils {
         opMode.telemetry.addLine(message);
         opMode.telemetry.addLine("Heading: " + getYawIMU());
         opMode.telemetry.update();
-        opMode.sleep(1000);
     }
     /* *********************** End of telemetry helper functions *********************** */
     
