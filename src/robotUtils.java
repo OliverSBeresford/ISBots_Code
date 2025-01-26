@@ -258,7 +258,7 @@ public class RobotUtils {
         }
     }
 
-    public void navigateTo(LinearOpMode opMode, int armPosition, double[] origin, double[] destination, boolean debugEnabled) {
+    public void navigateTo(LinearOpMode opMode, int armPosition, double[] origin, double[] destination, double currentHeading, boolean debugEnabled) {
         /* This function moves the robot to the blue basket
          * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
          */
@@ -268,6 +268,7 @@ public class RobotUtils {
             print(opMode, "Hardware is null", debugEnabled);
             return;
         }
+        setYawIMU(currentHeading);
 
         // Create variables to store the target coordinates
         double targetX = destination[0], 
@@ -275,17 +276,12 @@ public class RobotUtils {
             targetZ = destination[2];
 
         moveArm(opMode, armPosition);
-
         print(opMode, "Moved arm. Proceeding", debugEnabled);
-
         opMode.sleep(50);
 
         Pose3D currentPose;
-
         currentPose = getData(opMode, aprilTagProcessor, debugEnabled);
-
         print(opMode, "Got data. Making grid", debugEnabled);
-
         opMode.sleep(50);
 
         // Drive to the blue basket
@@ -516,7 +512,7 @@ public class RobotUtils {
     
 
     /* *********************** These functions relate to the Vision system. *********************** */
-    public VisionComponents initAprilTag(LinearOpMode opMode) {
+    public void initAprilTag(LinearOpMode opMode) {
         // Camera position and orientation
         Position cameraPosition = new Position(DistanceUnit.CM, 5, 21.5, 18, 0);
         // YawPitchRollAngles(AngleUnit angleUnit, double yaw, double pitch, double roll, long acquisitionTime)
@@ -545,8 +541,6 @@ public class RobotUtils {
         // Assign the AprilTagProcessor and VisionPortal to the class variables.
         aprilTagProcessor = myAprilTagProcessor;
         visionPortal = myVisionPortal;
-        
-        return new VisionComponents(myVisionPortal, myAprilTagProcessor);
     }
 
     public Pose3D getData(LinearOpMode opMode, AprilTagProcessor myAprilTagProcessor, boolean debugEnabled) {
