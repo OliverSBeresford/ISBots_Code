@@ -61,7 +61,7 @@ public class colorLocator extends LinearOpMode {
     //     1) standard image coordinates or 2) a normalized +/- 1.0 coordinate system.
     //     Use one form of the ImageRegion class to define the ROI.
     // 50% width/height square centered on screen
-    myColorBlobLocatorProcessorBuilder.setRoi(ImageRegion.asUnityCenterCoordinates(-0.5, 0.5, 0.5, -0.5));
+    myColorBlobLocatorProcessorBuilder.setRoi(ImageRegion.asUnityCenterCoordinates(-1.0, 0.0, 1.0, -1.0));
     // - Define which contours are included.
     //     You can get ALL the contours, or you can skip any contours that are completely inside another contour.
     //     note: EXTERNAL_ONLY helps to avoid bright reflection spots from breaking up areas of solid color.
