@@ -111,73 +111,83 @@ public class RobotUtils {
     /* *********************** End initialization functions *********************** */
 
     /* *********************** These functions relate to physical behaior of the robot *********************** */
-    public  void turnDegrees(LinearOpMode opMode, double turnAngle, boolean debugEnabled) {
-        /* This function turn the robot a certain number of degrees
-         * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
-         *             double turnAngle - The number of degrees to turn the robot.
-         */
-
-        // Making sure hardware is initialized
+    public void turnDegrees(LinearOpMode opMode, double turnAngle, boolean debugEnabled) {
+        // Ensure hardware is initialized
         if (leftDrive == null || rightDrive == null || imu == null) {
             return;
         }
-
+    
         if (debugEnabled) {
             opMode.telemetry.addData("Turning", turnAngle);
             opMode.telemetry.update();
         }
-
+    
         double currentAngle;
         double error;
         double turnPower;
-        double kP = 0.02; // Proportional constant, adjust for your robot
-        double minPower = 0.1; // Minimum power to ensure the motors turn the robot
-
-        // Determine the direction to turn and target heading
+        double kP = 0.015; // Adjusted proportional constant
+        double minPower = 0.05; // Lower minimum power for fine adjustments
+    
+        // Get starting angle and calculate target heading
         double startingAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         double targetHeading = startingAngle + turnAngle;
-
+    
+        // Normalize target heading to -180 to 180 range
         if (targetHeading > 180) {
-            targetHeading -= 360; // Wrap around for angles > 180 degrees
+            targetHeading -= 360;
         } else if (targetHeading < -180) {
-            targetHeading += 360; // Wrap around for angles < -180 degrees
+            targetHeading += 360;
         }
-
-        // Control loop to adjust motor power
+    
+        // Control loop for turning
         do {
             currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             error = targetHeading - currentAngle;
-
-            // Normalize error to the range -180 to 180 degrees
+    
+            // Normalize error to -180 to 180 range
             if (error > 180) {
                 error -= 360;
             } else if (error < -180) {
                 error += 360;
             }
-
-            // Calculate motor power based on proportional control
+    
+            // Calculate turn power with proportional control
             turnPower = kP * error;
-
-            // Ensure the power is sufficient to move the robot but not excessive
+    
+            // Ensure turn power is within bounds
             if (Math.abs(turnPower) < minPower) {
                 turnPower = Math.copySign(minPower, turnPower);
             }
             if (Math.abs(turnPower) > 1) {
                 turnPower = Math.copySign(1, turnPower);
             }
-
-            // Apply motor power for turning
+    
+            // Apply motor power
             leftDrive.setPower(turnPower);
             rightDrive.setPower(-turnPower);
-
-            // Allow time for the motors to respond
+    
+            // Debugging information
+            if (debugEnabled) {
+                opMode.telemetry.addData("Target Heading", targetHeading);
+                opMode.telemetry.addData("Current Angle", currentAngle);
+                opMode.telemetry.addData("Error", error);
+                opMode.telemetry.addData("Turn Power", turnPower);
+                opMode.telemetry.update();
+            }
+    
+            // Allow motors to respond
             opMode.sleep(10);
-        } while (Math.abs(error) > 1 && opMode.opModeIsActive());
-
-        // Stop the motors
+        } while (Math.abs(error) > 2 && opMode.opModeIsActive()); // Slightly relaxed threshold
+    
+        // Stop motors
         leftDrive.setPower(0);
         rightDrive.setPower(0);
-    }
+    
+        if (debugEnabled) {
+            opMode.telemetry.addData("Turn Complete", "Final Angle: " + imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+            opMode.telemetry.update();
+        }
+    }    
 
     public void driveStraight(LinearOpMode opMode, double distanceInInches, double power, double targetHeading, boolean debugEnabled) {
         /* This function drives the robot a certain distance in inches
@@ -344,15 +354,22 @@ public class RobotUtils {
             targetHeading = Math.toDegrees(Math.atan2(dy, dx));
 
             // Turn and move
+            print(opMode, "Turning to correct heading", debugEnabled);
             turnToHeading(opMode, imu, targetHeading, debugEnabled);
+
+            print(opMode, "Driving straight", debugEnabled);
+            opMode.sleep(1000);
             driveStraight(opMode, distance, 0.5, targetHeading, debugEnabled);
+            opMode.sleep(1000);
 
             // Periodically correct using AprilTag
             currentPose = getData(opMode, aprilTagProcessor, debugEnabled);
-            opMode.telemetry.addData("Position", currentPose.getPosition());
-            opMode.telemetry.addData("Heading", currentPose.getOrientation());
-            opMode.telemetry.update();
-
+            if (currentPose != null && debugEnabled) {
+                opMode.telemetry.addData("Position", currentPose.getPosition());
+                opMode.telemetry.addData("Heading", currentPose.getOrientation());
+                opMode.telemetry.update();
+            }
+            
             previous = current;
         }
     }
@@ -448,8 +465,8 @@ public class RobotUtils {
     /* *********************** These functions relate to pathfinding *********************** */
     private int[] fieldToGrid(double x, double y) {
         // Normalize x and y to grid space
-        int col = (int) Math.floor(((x + MAP_SIZE / 2) / CELL_SIZE) - (x > 0 ? 1e-9 : 0));
-        int row = (int) Math.floor(((MAP_SIZE / 2 - y) / CELL_SIZE) - (y > 0 ? 1e-9 : 0)); // Y decreases downward
+        int col = (int) Math.floor(((x + MAP_SIZE / 2) / CELL_SIZE) - (x == -(MAP_SIZE / 2) ? 0 : 1e-9));
+        int row = (int) Math.floor(((MAP_SIZE / 2 - y) / CELL_SIZE) - (y == (MAP_SIZE / 2) ? 0 : 1e-9)); // Y decreases downward
         return new int[]{row, col};
     }     
 
@@ -461,7 +478,8 @@ public class RobotUtils {
 
     private LinkedList<int[]> bfs(LinearOpMode opMode, int[][] grid, int[] start, int[] target, boolean debugEnabled) {
         if (!isValid(start[0], start[1], grid, new boolean[GRID_SIZE][GRID_SIZE]) || !isValid(target[0], target[1], grid, new boolean[GRID_SIZE][GRID_SIZE])) {
-            print(opMode, "Invalid start or target coordinates + " + start[0] + start[1] + target[0] + target[1], debugEnabled);
+            print(opMode, "Invalid\nStartY: " + start[0] + "\nStartX: " + start[1] + "\nTargetY: " + target[0] + "\nTargetX: " + target[1], debugEnabled);
+            opMode.sleep(10000);
             return null;
         }
 
