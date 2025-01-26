@@ -62,8 +62,8 @@ public class RobotUtils {
     public final double[] BLUE_HIGH_CHAMBER = {0, 24, 26};
     public final double[] RED_ASCENT = {-24, 0, 20};
     public final double[] BLUE_ASCENT = {24, 0, 20};
-    public final double[] RED_START = {72, -72, 0};
-    public final double[] BLUE_START = {-72, 72, 0};
+    public final double[] RED_OBSERVATION = {72, -72, 0};
+    public final double[] BLUE_OBSERVATION = {-72, 72, 0};
 
     // Grid dimensions
     private final int GRID_SIZE = 6;
@@ -94,6 +94,7 @@ public class RobotUtils {
         leftDrive = _leftDrive;
         rightDrive = _rightDrive;
         imu = _imu;
+        imu.resetYaw();
     }
 
     public void setHardware(DcMotor _leftDrive, DcMotor _rightDrive, IMU _imu, CRServo _intake, Servo _wrist, DcMotorEx _armMotor) {
@@ -103,6 +104,7 @@ public class RobotUtils {
         intake = _intake;
         wrist = _wrist;
         armMotor = _armMotor;
+        imu.resetYaw();
     }
 
     public void setColorSensor(ColorSensor _colorSensor) {
@@ -123,13 +125,14 @@ public class RobotUtils {
         }
     
         double currentAngle;
-        double error;
+        double error = 0.0;
         double turnPower;
-        double kP = 0.015; // Adjusted proportional constant
-        double minPower = 0.05; // Lower minimum power for fine adjustments
+        double previousError;
+        double kP = 0.01; // Adjusted proportional constant
+        double power = 0.1; // Lower minimum power for fine adjustments
     
         // Get starting angle and calculate target heading
-        double startingAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        double startingAngle = getYawIMU();
         double targetHeading = startingAngle + turnAngle;
     
         // Normalize target heading to -180 to 180 range
@@ -141,30 +144,21 @@ public class RobotUtils {
     
         // Control loop for turning
         do {
-            currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            previousError = error;
+            currentAngle = getYawIMU();
             error = targetHeading - currentAngle;
-    
-            // Normalize error to -180 to 180 range
-            if (error > 180) {
-                error -= 360;
-            } else if (error < -180) {
-                error += 360;
+
+            if (isWithinRange(-previousError, error, 10)) {
+                error = previousError;
             }
     
             // Calculate turn power with proportional control
             turnPower = kP * error;
     
-            // Ensure turn power is within bounds
-            if (Math.abs(turnPower) < minPower) {
-                turnPower = Math.copySign(minPower, turnPower);
-            }
-            if (Math.abs(turnPower) > 1) {
-                turnPower = Math.copySign(1, turnPower);
-            }
-    
             // Apply motor power
-            leftDrive.setPower(turnPower);
-            rightDrive.setPower(-turnPower);
+            turnPower = Math.copySign(power, turnPower); // temporary
+            leftDrive.setPower(-turnPower);
+            rightDrive.setPower(turnPower);
     
             // Debugging information
             if (debugEnabled) {
@@ -172,19 +166,21 @@ public class RobotUtils {
                 opMode.telemetry.addData("Current Angle", currentAngle);
                 opMode.telemetry.addData("Error", error);
                 opMode.telemetry.addData("Turn Power", turnPower);
+                opMode.telemetry.addData("Starting Angle", startingAngle);
+                opMode.telemetry.addData("Previous Error", previousError);
                 opMode.telemetry.update();
             }
     
             // Allow motors to respond
             opMode.sleep(10);
-        } while (Math.abs(error) > 2 && opMode.opModeIsActive()); // Slightly relaxed threshold
+        } while (Math.abs(error) > 5 && opMode.opModeIsActive()); // Slightly relaxed threshold
     
         // Stop motors
         leftDrive.setPower(0);
         rightDrive.setPower(0);
     
         if (debugEnabled) {
-            opMode.telemetry.addData("Turn Complete", "Final Angle: " + imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+            opMode.telemetry.addData("Turn Complete", "Final Angle: " + getYawIMU());
             opMode.telemetry.update();
         }
     }    
@@ -221,14 +217,14 @@ public class RobotUtils {
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        leftDrive.setPower(power);
-        rightDrive.setPower(power);
+        // leftDrive.setPower(power);
+        // rightDrive.setPower(power);
 
         while (leftDrive.isBusy() && rightDrive.isBusy() && opMode.opModeIsActive()) {
             double currentHeading = getYawIMU();;
             double error = targetHeading - currentHeading;
 
-            double correction = error * 0.02; // Proportional constant
+            double correction = error * 0.001; // Proportional constant
             leftDrive.setPower(power + correction);
             rightDrive.setPower(power - correction);
 
@@ -262,7 +258,7 @@ public class RobotUtils {
         }
     }
 
-    public void navigateTo(LinearOpMode opMode, int armPosition, double[] destination, double[] origin, boolean debugEnabled) {
+    public void navigateTo(LinearOpMode opMode, int armPosition, double[] origin, double[] destination, boolean debugEnabled) {
         /* This function moves the robot to the blue basket
          * Parameters: LinearOpMode opMode - The LinearOpMode object that is used to run the robot.
          */
@@ -315,6 +311,11 @@ public class RobotUtils {
         LinkedList<int[]> path = bfs(opMode, FIELD, start, target, debugEnabled);
         if (path == null) {
             print(opMode, "Path was null", debugEnabled);
+            return;
+        }
+        if (debugEnabled) {
+            printPath(opMode, path);
+            opMode.sleep(1000);
         }
 
         // Give time for robot to respond
@@ -338,6 +339,9 @@ public class RobotUtils {
         // Follow the path
         int[] previous = start;
         for (int[] current : path) {
+            if (!opMode.opModeIsActive()) {
+                return;
+            }
             nextField = gridToField(previous[0], previous[1]);
             // Calculate direction and distance
             if (currentPose == null) {
@@ -358,9 +362,10 @@ public class RobotUtils {
             turnToHeading(opMode, imu, targetHeading, debugEnabled);
 
             print(opMode, "Driving straight", debugEnabled);
-            opMode.sleep(1000);
-            driveStraight(opMode, distance, 0.5, targetHeading, debugEnabled);
-            opMode.sleep(1000);
+            opMode.sleep(10);
+            driveStraight(opMode, distance, 0.1, targetHeading, debugEnabled);
+            opMode.sleep(10);
+            print(opMode, "Drove straight", debugEnabled);
 
             // Periodically correct using AprilTag
             currentPose = getData(opMode, aprilTagProcessor, debugEnabled);
@@ -374,68 +379,55 @@ public class RobotUtils {
         }
     }
 
-    public void driveToBlob(LinearOpMode opMode, double targetBlobArea, double stopThreshold, boolean debugEnabled) {
-        if (imu == null || blobProcessor == null || aprilTagProcessor == null) {
-            print(opMode, "Blob processing encountered error", debugEnabled);
+    public void printPath(LinearOpMode opMode, LinkedList<int[]> path) {
+        opMode.telemetry.addLine("Path: ");
+        for (int[] position : path) {
+            opMode.telemetry.addLine("(Row: " + position[0] + ", Col: " + position[1] + ")");
         }
+        opMode.telemetry.update();
+    }
 
-        while (opMode.opModeIsActive()) {
-            // Get blob position and size
-            ColorBlobLocatorProcessor.Blob blob = null;
-            List<ColorBlobLocatorProcessor.Blob> myBlobs = blobProcessor.getBlobs();
-            RotatedRect myBoxFit;
-            ColorBlobLocatorProcessor.Util.filterByArea(50, 20000, myBlobs);
-            
-            // Display the size (area) and center location for each Blob.
-            for (ColorBlobLocatorProcessor.Blob myBlob : myBlobs) {
-                blob = myBlob;
-                break;
-            }
-            // Get a "best-fit" bounding box (called "boxFit", of type RotatedRect) for this blob.
-            myBoxFit = blob.getBoxFit();
-
-            if (blob == null) {
-                opMode.telemetry.addData("Blob Status", "No blob detected");
-                opMode.telemetry.update();
-                continue; // Skip this loop iteration if no blob is detected
-            }
-
-            // Blob properties
-            double blobX = myBoxFit.center.x; // X position of the blob in pixels
-            double blobArea = blob.getContourArea(); // Area of the blob (size)
-
-            // Check if the blob is close enough (based on area)
-            if (blobArea >= stopThreshold * targetBlobArea) {
-                opMode.telemetry.addData("Blob Status", "Target reached");
-                opMode.telemetry.update();
-                break; // Stop moving if close enough
-            }
-
-            // Calculate horizontal angle to blob
-            double angleToBlob = ((blobX - CAMERA_RESOLUTION_WIDTH / 2.0) / CAMERA_RESOLUTION_WIDTH) * CAMERA_FOV_HORIZONTAL;
-
-            // Get current heading and compute turn angle
-            double currentHeading = getYawIMU();
-            double targetHeading = currentHeading + angleToBlob;
-
-            // Adjust heading to stay within [-180, 180]
-            if (targetHeading > 180) targetHeading -= 360;
-            if (targetHeading < -180) targetHeading += 360;
-
-            // Turn towards the blob
-            turnToHeading(opMode, imu, targetHeading, debugEnabled);
-
-            // Drive forward a short distance
-            driveStraight(opMode, 6, 0.3, targetHeading, debugEnabled); // Drive 6 inches forward
-
-            // Correct position periodically using AprilTag
-            Pose3D pose = getData(opMode, aprilTagProcessor, debugEnabled);
-            opMode.telemetry.addData("Position", pose.getPosition());
-            opMode.telemetry.addData("Heading", pose.getOrientation());
-            opMode.telemetry.addData("Blob Area", blobArea);
+    public void turnTowardsBlob(LinearOpMode opMode, boolean debugEnabled) {
+        if (imu == null || blobProcessor == null) {
+            print(opMode, "Turning towards blob encountered error", debugEnabled);
+            return;
+        }
+    
+        // Get blob information
+        List<ColorBlobLocatorProcessor.Blob> blobs = blobProcessor.getBlobs();
+        ColorBlobLocatorProcessor.Util.filterByArea(50, 20000, blobs);
+    
+        if (blobs.isEmpty()) {
+            opMode.telemetry.addData("Blob Status", "No blob detected");
+            opMode.telemetry.update();
+            return; // No blob to turn towards
+        }
+    
+        // Use the first detected blob
+        ColorBlobLocatorProcessor.Blob blob = blobs.get(0);
+        RotatedRect boxFit = blob.getBoxFit();
+        double blobX = boxFit.center.x;
+    
+        // Calculate angle to blob
+        double angleToBlob = ((blobX - CAMERA_RESOLUTION_WIDTH / 2.0) / CAMERA_RESOLUTION_WIDTH) * CAMERA_FOV_HORIZONTAL;
+    
+        // Get current heading and compute target heading
+        double currentHeading = getYawIMU();
+        double targetHeading = currentHeading + angleToBlob;
+    
+        // Normalize target heading to [-180, 180]
+        if (targetHeading > 180) targetHeading -= 360;
+        if (targetHeading < -180) targetHeading += 360;
+    
+        // Turn to the calculated heading
+        turnToHeading(opMode, imu, targetHeading, debugEnabled);
+    
+        if (debugEnabled) {
+            opMode.telemetry.addData("Turning Complete", "Aligned with Blob");
             opMode.telemetry.update();
         }
     }
+    
 
     private void turnToHeading(LinearOpMode opMode, IMU imu, double targetHeading, boolean debugEnabled) {
         double currentHeading = getYawIMU();
@@ -709,13 +701,19 @@ public class RobotUtils {
         return Math.abs(actual - target) <= tolerance;
     }
 
+    private boolean isWithinRange(double actual, double target, double tolerance) {
+        return Math.abs(actual - target) <= tolerance;
+    }
+
     /* *********************** Telemetry helper functions *********************** */
     private void print(LinearOpMode opMode, String message, boolean debugEnabled) {
         if (!debugEnabled) {
             return;
         }
         opMode.telemetry.addLine(message);
+        opMode.telemetry.addLine("Heading: " + getYawIMU());
         opMode.telemetry.update();
+        opMode.sleep(1000);
     }
     /* *********************** End of telemetry helper functions *********************** */
     
