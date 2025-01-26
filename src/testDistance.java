@@ -174,7 +174,6 @@ public class TestDistance extends LinearOpMode {
         /* Run until the driver presses stop */
         while (opModeIsActive()) {
             if (gamepad1.x) {
-                imu.resetYaw();
                 robotUtils.driveStraight(this, 10, 0.5, 0, true);
             }
 
