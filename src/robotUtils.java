@@ -51,8 +51,8 @@ public class RobotUtils {
     private final int colorThreshold = 500;
 
     // Vision constants
-    private final int CAMERA_RESOLUTION_WIDTH =  752;
-    private final int CAMERA_RESOLUTION_HEIGHT = 416;
+    private final int CAMERA_RESOLUTION_WIDTH =  640;
+    private final int CAMERA_RESOLUTION_HEIGHT = 480;
     private final int CAMERA_FOV_HORIZONTAL = 60;
 
     // Constants for pathfinding
@@ -129,7 +129,7 @@ public class RobotUtils {
         double turnPower;
         double previousError;
         double kP = 0.01; // Adjusted proportional constant
-        double power = 0.1; // Lower minimum power for fine adjustments
+        double power = 0.2; // Lower minimum power for fine adjustments
     
         // Get starting angle and calculate target heading
         double startingAngle = getYawIMU();
@@ -412,15 +412,7 @@ public class RobotUtils {
         double angleToBlob = ((blobX - CAMERA_RESOLUTION_WIDTH / 2.0) / CAMERA_RESOLUTION_WIDTH) * CAMERA_FOV_HORIZONTAL;
     
         // Get current heading and compute target heading
-        double currentHeading = getYawIMU();
-        double targetHeading = currentHeading + angleToBlob;
-    
-        // Normalize target heading to [-180, 180]
-        if (targetHeading > 180) targetHeading -= 360;
-        if (targetHeading < -180) targetHeading += 360;
-    
-        // Turn to the calculated heading
-        turnToHeading(opMode, imu, targetHeading, debugEnabled);
+        turnDegrees(opMode, -angleToBlob, debugEnabled);
     
         if (debugEnabled) {
             opMode.telemetry.addData("Turning Complete", "Aligned with Blob");
@@ -640,7 +632,7 @@ public class RobotUtils {
         // - Specify the color range you are looking for.
         myColorBlobLocatorProcessorBuilder.setTargetColorRange(ColorRange.BLUE);
         // 50% width/height square centered on screen
-        myColorBlobLocatorProcessorBuilder.setRoi(ImageRegion.asUnityCenterCoordinates(-0.5, 0.5, 0.5, -0.5));
+        myColorBlobLocatorProcessorBuilder.setRoi(ImageRegion.asUnityCenterCoordinates(-1.0, 0.0, 1.0, -1.0));
         // - Define which contours are included.
         myColorBlobLocatorProcessorBuilder.setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY);
         // - Turn the display of contours ON or OFF.  Turning this on helps debugging but takes up valuable CPU time.
