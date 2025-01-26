@@ -250,8 +250,12 @@ public class ISBotsTeleOp extends LinearOpMode {
             // If you click the left joystick you'll go to the red basket
             if (gamepad1.left_stick_button && !lastLStickState) {
                 position = robotUtils.getData(this, robotUtils.aprilTagProcessor, true);
+                sleep(1000);
                 if (position != null) {
                     coordinates = new double[]{position.getPosition().x, position.getPosition().y, position.getPosition().z};
+                    telemetry.addData("Coords", coordinates);
+                    telemetry.update();
+                    sleep(5000);
                     robotUtils.navigateTo(this, (int) armPosition, coordinates, robotUtils.RED_BASKET, 0, true);
                 }
             }
@@ -324,7 +328,11 @@ public class ISBotsTeleOp extends LinearOpMode {
             We also set the target velocity (speed) the motor runs at, and use setMode to run it.*/
             armMotor.setTargetPosition((int) (armPosition + armPositionFudgeFactor));
 
-            ((DcMotorEx) armMotor).setVelocity(5000);
+            if (armPosition == ARM_WINCH_ROBOT) {
+                ((DcMotorEx) armMotor).setVelocity(1000);
+            } else {
+                ((DcMotorEx) armMotor).setVelocity(5000);
+            }
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             /* Changing the wrist's position */
