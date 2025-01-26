@@ -51,7 +51,7 @@ public class testAprilTag extends LinearOpMode {
         robotUtils = new RobotUtils();
         
         // Initialize the apriltag processor.
-        robotUtils.VisionComponents visionComponents = robotUtils.initAprilTag();
+        robotUtils.initAprilTag(this);
         myVisionPortal = visionComponents.visionPortal;
         myAprilTagProcessor = visionComponents.aprilTagProcessor;
 
