@@ -123,6 +123,9 @@ public class ISBotsTeleOp extends LinearOpMode {
         boolean lastAState = false;
         boolean lastXState = false;
         boolean lastBState = false;
+        boolean lastLStickState = false;
+        Pose3D position = null;
+        double[] coordinates;
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.LEFT)));
 
@@ -137,7 +140,7 @@ public class ISBotsTeleOp extends LinearOpMode {
         robotUtils = new RobotUtils();
         robotUtils.setHardware(leftDrive, rightDrive, imu, intake, wrist, (DcMotorEx) armMotor);
         robotUtils.setColorSensor(colorSensor);
-
+        robotUtils.initAprilTag();
 
         /* Most skid-steer/differential drive robots require reversing one motor to drive forward.
         for this robot, we reverse the right motor.*/
@@ -243,10 +246,19 @@ public class ISBotsTeleOp extends LinearOpMode {
                     intakePower = INTAKE_OFF;
                 }
             }
+            // If you click the left joystick you'll go to the red basket
+            if (gamepad1.LeftStickButton && !lastLStickState) {
+                position = robotUtils.getData(this, robotUtils.aprilTagProcessor);
+                if (position != null) {
+                    coordinates = new double[]{position.getPosition().x, position.getPosition().y, position.getPosition().z};
+                    robotUtils.navigateTo(this, (int) armPosition, coordinates, robotUtils.RED_BASKET, 0, true);
+                }
+            }
             // Saving the states of each button
             lastAState = gamepad1.a;
             lastBState = gamepad1.b;
             lastXState = gamepad1.x;
+            lastLStickState = gamepad1.LeftStickButton;
 
             /* Arm control */
             if(gamepad1.right_bumper) {
@@ -311,7 +323,7 @@ public class ISBotsTeleOp extends LinearOpMode {
             We also set the target velocity (speed) the motor runs at, and use setMode to run it.*/
             armMotor.setTargetPosition((int) (armPosition + armPositionFudgeFactor));
 
-            ((DcMotorEx) armMotor).setVelocity(2100);
+            ((DcMotorEx) armMotor).setVelocity(5000);
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             /* Changing the wrist's position */
