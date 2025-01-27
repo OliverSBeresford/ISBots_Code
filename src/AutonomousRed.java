@@ -103,7 +103,7 @@ public class AutonomousRed extends LinearOpMode {
         // Initialize the robot utility class to have access to useful methods
         robotUtils = new RobotUtils();
         robotUtils.setHardware(leftDrive, rightDrive, imu, intake, wrist, armMotor);
-        robotUtils.initAprilTag(this);
+        robotUtils.initCamera(this);
 
         // Set motor directions
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -135,19 +135,20 @@ public class AutonomousRed extends LinearOpMode {
         intakePower = INTAKE_COLLECT;
 
         while (opModeIsActive()) {
-            position = robotUtils.getData(this, robotUtils.aprilTagProcessor, true);
-            if (position != null) {
-                coordinates = new double[]{position.getPosition().x, position.getPosition().y, position.getPosition().z};
-                telemetry.addLine("Coords: " + position.getPosition().x + position.getPosition().y + position.getPosition().z);
-                telemetry.update();
-                sleep(5000);
-                robotUtils.navigateTo(this, (int) ARM_COLLAPSED_INTO_ROBOT, coordinates, robotUtils.BLUE_OBSERVATION, 0, true);
-            } else {
+            robotUtils.turnTowardsBlob(this, true);
+            intake.setPower(INTAKE_COLLECT);
+            while (!robotUtils.isRedBlock() && opModeIsActive()) {
                 leftDrive.setPower(0.1);
                 rightDrive.setPower(0.1);
                 sleep(10);
             }
-    }
+            robotUtils.navigateTo(this, (int) ARM_SCORE_SAMPLE_IN_LOW, new double[]{-24, 71.5, 0}, robotUtils.RED_BASKET, intakePower, false);
+            intake.setPower(INTAKE_DEPOSIT);
+
+            robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT);
+
+            sleep(30000);
+        }
     }
 }
 
