@@ -132,7 +132,7 @@ public class Navigate extends LinearOpMode {
         intakePower = INTAKE_COLLECT;
 
         while (opModeIsActive()) {
-            robotUtils.navigateTo(this, (int) ARM_SCORE_SAMPLE_IN_LOW, robotUtils.BLUE_OBSERVATION, new double[]{-47.5, 47.5, 0}, 0, true);
+            robotUtils.navigateTo(this, (int) ARM_COLLAPSED_INTO_ROBOT, new double[]{-55, 0, 0}, robotUtils.RED_OBSERVATION, 0, true);
         }
     }
 
