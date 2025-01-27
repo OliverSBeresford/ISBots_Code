@@ -338,7 +338,7 @@ public class ISBotsTeleOp extends LinearOpMode {
             /* Changing the wrist's position */
             wrist.setPosition(wristPosition);
             
-            if (robotUtils.isAnyColorBlock()) {
+            if (robotUtils.isAnyColorBlock() && intakePower == INTAKE_COLLECT) {
                 intakePower = INTAKE_OFF;
             }
 
