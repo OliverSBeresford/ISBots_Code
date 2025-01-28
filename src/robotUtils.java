@@ -66,19 +66,26 @@ public class RobotUtils {
     public final double[] BLUE_OBSERVATION = {-72, 72, 0};
 
     // Grid dimensions
-    public final int GRID_SIZE = 6;
     public final double MAP_SIZE = 144.0;
-    public final double CELL_SIZE = 24.0; // Inches
+    private static final int GRID_SIZE = 12;
+    private static final double CELL_SIZE = 12; // Inches
 
     // Define the 6x6 grid. 1 = obstacle, 0 = traversable
-    public final int[][] FIELD = {
-        {0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 1},
-        {0, 0, 1, 1, 0, 0},
-        {0, 0, 1, 1, 0, 0},
-        {1, 0, 0, 0, 0, 1},
-        {0, 0, 0, 0, 0, 0}
+    private static final int[][] FIELD = {
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
+        {0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0},
+        {0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0},
+        {0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0},
+        {1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
     };
+
 
     /* These are the various functions to initialize whatever parts of the RobotUtils class you need
      * 
@@ -147,6 +154,12 @@ public class RobotUtils {
             previousError = error;
             currentAngle = getYawIMU();
             error = targetHeading - currentAngle;
+
+            if (error < -360) {
+                error += 360;
+            } else if (error > 360) {
+                error -= 360;
+            }
 
             if (isWithinRange(-previousError, error, 10)) {
                 error = previousError;
@@ -352,6 +365,7 @@ public class RobotUtils {
             dy = currentField[1] - nextField[1];
             distance = Math.hypot(dx, dy);
             targetHeading = Math.toDegrees(Math.atan2(dy, dx));
+            print(opMode, "Target heading (in calculating): " + targetHeading, debugEnabled);
 
             // Turn and move
             print(opMode, "Turning to correct heading", debugEnabled);
@@ -359,7 +373,7 @@ public class RobotUtils {
 
             print(opMode, "Driving straight", debugEnabled);
             opMode.sleep(10);
-            driveStraight(opMode, distance, 0.1, targetHeading, debugEnabled);
+            driveStraight(opMode, distance, 0.5, targetHeading, debugEnabled);
             opMode.sleep(10);
             print(opMode, "Drove straight", debugEnabled);
 
