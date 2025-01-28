@@ -183,9 +183,6 @@ public class RobotUtils {
                 opMode.telemetry.addData("Previous Error", previousError);
                 opMode.telemetry.update();
             }
-    
-            // Allow motors to respond
-            opMode.sleep(10);
         } while (Math.abs(error) > 5 && opMode.opModeIsActive()); // Slightly relaxed threshold
     
         // Stop motors
