@@ -361,8 +361,9 @@ public class RobotUtils {
             dx = currentField[0] - nextField[0];
             dy = currentField[1] - nextField[1];
             distance = Math.hypot(dx, dy);
-            targetHeading = Math.toDegrees(Math.atan2(dy, dx));
+            targetHeading = Math.toDegrees(Math.atan2(dx, dy));
             print(opMode, "Target heading (in calculating): " + targetHeading, debugEnabled);
+            print(opMode, "Dx: " + dx + ", Dy: " + dy, debugEnabled);
 
             // Turn and move
             print(opMode, "Turning to correct heading", debugEnabled);
