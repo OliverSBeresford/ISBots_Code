@@ -132,13 +132,8 @@ public class Park extends LinearOpMode {
         intakePower = INTAKE_COLLECT;
 
         imu.resetYaw();
-        robotUtils.setYawIMU(-90);
-
-        while (opModeIsActive()) {
-            robotUtils.driveStraight(this, 5, 0.3, -90, false);
-            robotUtils.navigateTo(this, (int) ARM_COLLAPSED_INTO_ROBOT, new double[]{-35, -72, 0}, robotUtils.RED_OBSERVATION, -90, true);
-        }
+        robotUtils.turnDegrees(this, -90, true);
+        robotUtils.driveStraight(this, 60, 0.5, -90, true);
     }
-
 }
 
