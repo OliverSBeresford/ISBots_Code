@@ -320,6 +320,7 @@ public class RobotUtils {
             return;
         }
         if (debugEnabled) {
+            opMode.telemetry.addData("Start", "Row: " + start[0] + ", Col: " + start[1]);
             printPath(opMode, path);
             opMode.sleep(1000);
         }
@@ -361,9 +362,9 @@ public class RobotUtils {
             dx = currentField[0] - nextField[0];
             dy = currentField[1] - nextField[1];
             distance = Math.hypot(dx, dy);
-            targetHeading = Math.toDegrees(Math.atan2(dx, dy));
+            targetHeading = Math.toDegrees(Math.atan2(-dx, dy));
             print(opMode, "Target heading (in calculating): " + targetHeading, debugEnabled);
-            print(opMode, "Dx: " + dx + ", Dy: " + dy, debugEnabled);
+            print(opMode, "Dx: " + dx + ", Dy: " + dy + "\nTarget y: " + previous[0] + ", target x: " + previous[1], debugEnabled);
 
             // Turn and move
             print(opMode, "Turning to correct heading", debugEnabled);
@@ -471,7 +472,6 @@ public class RobotUtils {
     private LinkedList<int[]> bfs(LinearOpMode opMode, int[][] grid, int[] start, int[] target, boolean debugEnabled) {
         if (!isValid(start[0], start[1], grid, new boolean[GRID_SIZE][GRID_SIZE]) || !isValid(target[0], target[1], grid, new boolean[GRID_SIZE][GRID_SIZE])) {
             print(opMode, "Invalid\nStartY: " + start[0] + "\nStartX: " + start[1] + "\nTargetY: " + target[0] + "\nTargetX: " + target[1], debugEnabled);
-            opMode.sleep(10000);
             return null;
         }
 
@@ -595,11 +595,11 @@ public class RobotUtils {
                 opMode.telemetry.addLine("XYZ = X (Right), Y (Forward), Z (Up) dist.");
                 opMode.telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");
 
-                opMode.telemetry.update();
-
                 if (imu != null) {
                     opMode.telemetry.addData("IMU yaw", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
                 }
+
+                opMode.telemetry.update();
 
                 return myAprilTagDetection.robotPose;
             } else {
@@ -710,6 +710,12 @@ public class RobotUtils {
         }
         opMode.telemetry.addLine(message);
         opMode.telemetry.addLine("Heading: " + getYawIMU());
+
+        /* Check to see if our arm is over the current limit, and report via telemetry. */
+        if (armMotor != null && ((DcMotorEx) armMotor).isOverCurrent()){
+            opMode.telemetry.addLine("MOTOR EXCEEDED CURRENT LIMIT!");
+        }
+
         opMode.telemetry.update();
     }
     /* *********************** End of telemetry helper functions *********************** */
