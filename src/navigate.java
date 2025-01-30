@@ -131,9 +131,9 @@ public class Navigate extends LinearOpMode {
         wristPosition = WRIST_FOLDED_OUT;
         intakePower = INTAKE_COLLECT;
 
-        while (opModeIsActive()) {
-            robotUtils.navigateTo(this, (int) ARM_COLLAPSED_INTO_ROBOT, new double[]{-55, 0, 0}, robotUtils.RED_OBSERVATION, 0, true);
-        }
+        double[] start = {0, 72, 0};
+
+        robotUtils.navigateTo(this, (int) ARM_COLLAPSED_INTO_ROBOT, robotUtils.RED_OBSERVATION, robotUtils.BLUE_OBSERVATION, 0, true);
     }
 
 }
