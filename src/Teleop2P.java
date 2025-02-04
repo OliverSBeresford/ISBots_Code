@@ -223,9 +223,17 @@ public class ISBotsTeleOp extends LinearOpMode {
             if (gamepad2.a) {
                 intakePower = INTAKE_COLLECT;
             }
+            // If you are holding b, the intake is depositing
+            else if (gamepad2.b) {
+                intakePower = INTAKE_DEPOSIT;
+            }
+            // If you click nothing, the intake is off
+            else {
+                intakePower = INTAKE_OFF;
+            }
 
             // If you click x (do only once before you take your finger off)
-            else if (gamepad2.x && !lastXState) {
+            if (gamepad2.x && !lastXState) {
                 if (wristPosition == WRIST_FOLDED_IN || wristPosition == WRIST_FOLDED_LEFT) {
                     wristPosition = WRIST_FOLDED_OUT;
                 } else if (wristPosition == WRIST_FOLDED_OUT && lastWristPosition == WRIST_FOLDED_IN) {
@@ -235,16 +243,6 @@ public class ISBotsTeleOp extends LinearOpMode {
                     wristPosition = WRIST_FOLDED_IN;
                     lastWristPosition = WRIST_FOLDED_IN;
                 }
-            }
-
-            // If you are holding b, the intake is depositing
-            if (gamepad2.b) {
-                intakePower = INTAKE_DEPOSIT;
-            }
-
-            // If you click nothing, the intake is off
-            if (!gamepad2.b && !gamepad2.a) {
-                intakePower = INTAKE_OFF;
             }
 
             // If you click the left joystick you'll go to the red basket
