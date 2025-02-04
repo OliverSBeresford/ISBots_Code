@@ -220,11 +220,12 @@ public class ISBotsTeleOp extends LinearOpMode {
             And if the user presses B it reveres the servo to spit out the element.*/
 
             // If you click a (do only once before you take your finger off)
-            if (gamepad1.a) {
-                intakePower = INTAKE_COLLECT;
-            } if (!gamepad1.a) {
-                intakePower = INTAKE_OFF;
-                telemetry.addLine("not clicking a");
+            if (gamepad1.a && !lastAState) {
+                if (intakePower == INTAKE_OFF) {
+                    intakePower = INTAKE_COLLECT;
+                } else if (intakePower == INTAKE_COLLECT) {
+                    intakePower = INTAKE_OFF;
+                }
             }
             // If you click x (do only once before you take your finger off)
             else if (gamepad1.x && !lastXState) {
@@ -239,11 +240,12 @@ public class ISBotsTeleOp extends LinearOpMode {
                 }
             }
             // If you click b (do only once before you take your finger off)
-            if (gamepad1.b) {
-                intakePower = INTAKE_DEPOSIT;
-            } if (!gamepad1.b) {
-                intakePower = INTAKE_OFF;
-                telemetry.addLine("not clicking b");
+            if (gamepad1.b && !lastBState) {
+                if (intakePower == INTAKE_OFF) {
+                    intakePower = INTAKE_DEPOSIT;
+                } else if (intakePower == INTAKE_DEPOSIT) {
+                    intakePower = INTAKE_OFF;
+                }
             }
             // If you click the left joystick you'll go to the red basket
             if (gamepad1.left_stick_button && !lastLStickState) {
