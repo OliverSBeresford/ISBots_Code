@@ -130,12 +130,22 @@ public class AutonomousRed extends LinearOpMode {
         robotUtils.turnDegrees(this, angle, true); // Turn to face the target
         robotUtils.moveDistance(this, distance, true);
         robotUtils.moveDistance(this, 10, true); // Align
-        robotUtils.moveDistance(this, -10, true); // Back up
+        robotUtils.moveDistance(this, -15, true); // Back up
         robotUtils.moveArm(this, (int) ARM_SCORE_SAMPLE_IN_LOW); // Move arm to right position
         robotUtils.moveDistance(this, -10, true); // Back up
         intake.setPower(INTAKE_DEPOSIT); // Deposit specimen
         sleep(200); // Wait for deposit
         robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT); // Move arm back to original position
+
+
+        // Drive the blocks to the human player
+        robotUtils.turnDegrees(this,-90,true); //Turn to the right
+        robotUtils.moveDistance(this,48,true); //moves forward
+        robotUtils.turnDegrees(this, 90,true); //Turn to the left
+        robotUtils.moveDistance(this, 20,true); //Moves forward
+        robotUtils.turnDegrees(this, 10,true);
+        robotUtils.moveDistance(this,-55,true); //brings the first block to the human player
+        robotUtils.moveDistance(this,55,true); 
     }
 }
 
