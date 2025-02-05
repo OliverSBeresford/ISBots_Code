@@ -49,8 +49,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
  */
 
 
-@TeleOp
-public class ISBotsTeleOp extends LinearOpMode {
+@TeleOp(name="Teleop 2 players")
+public class TeleOp2P extends LinearOpMode {
     /* Declare OpMode members. */
     public DcMotor  leftDrive   = null; //the left drivetrain motor
     public DcMotor  rightDrive  = null; //the right drivetrain motor
