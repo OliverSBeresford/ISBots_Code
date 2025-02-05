@@ -72,6 +72,7 @@ public class AutonomousRed extends LinearOpMode {
         double wristPosition = WRIST_FOLDED_IN;
         double intakePower = INTAKE_OFF;
         double[] coordinates;
+        boolean debugEnabled = true;
 
         // Initialize hardware
         leftDrive = hardwareMap.get(DcMotor.class, "leftMotor");
@@ -119,7 +120,9 @@ public class AutonomousRed extends LinearOpMode {
         wristPosition = WRIST_FOLDED_OUT;
         intakePower = INTAKE_COLLECT;
 
-        double[] startCoordinates = {-10, 68, 0};
+        robotUtils.setYawIMU(20);
+
+        double[] startCoordinates = {-18, 68, 0};
         double[] targetCoordinates = {0, 40, 0};
         double dx = targetCoordinates[0] - startCoordinates[0];
         double dy = targetCoordinates[1] - startCoordinates[1];
@@ -127,25 +130,25 @@ public class AutonomousRed extends LinearOpMode {
         double angle = (Math.toDegrees(Math.atan2(dy, dx)) - 90 + 360) % 360; // Normalize to [0, 360]
 
         // Hook specimen at the beginning of the game
-        robotUtils.turnDegrees(this, angle, true); // Turn to face the target
-        robotUtils.moveDistance(this, distance, true);
-        robotUtils.moveDistance(this, 10, true); // Align
-        robotUtils.moveDistance(this, -15, true); // Back up
+        robotUtils.turnDegrees(this, angle, debugEnabled); // Turn to face the target
+        robotUtils.moveDistance(this, distance, debugEnabled);
+        robotUtils.moveDistance(this, 10, debugEnabled); // Align
+        robotUtils.moveDistance(this, -15, debugEnabled); // Back up
         robotUtils.moveArm(this, (int) ARM_SCORE_SAMPLE_IN_LOW); // Move arm to right position
-        robotUtils.moveDistance(this, -10, true); // Back up
+        robotUtils.moveDistance(this, -10, debugEnabled); // Back up
         intake.setPower(INTAKE_DEPOSIT); // Deposit specimen
         sleep(200); // Wait for deposit
         robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT); // Move arm back to original position
 
 
         // Drive the blocks to the human player
-        robotUtils.turnDegrees(this,-90,true); //Turn to the right
-        robotUtils.moveDistance(this,48,true); //moves forward
-        robotUtils.turnDegrees(this, 90,true); //Turn to the left
-        robotUtils.moveDistance(this, 20,true); //Moves forward
-        robotUtils.turnDegrees(this, 10,true);
-        robotUtils.moveDistance(this,-55,true); //brings the first block to the human player
-        robotUtils.moveDistance(this,55,true); 
+        robotUtils.turnDegrees(this, -90, debugEnabled); //Turn to the right
+        robotUtils.moveDistance(this, 48, debugEnabled); //moves forward
+        robotUtils.turnDegrees(this, 90, debugEnabled); //Turn to the left
+        robotUtils.moveDistance(this, 20, debugEnabled); //Moves forward
+        robotUtils.turnDegrees(this, 10, debugEnabled);
+        robotUtils.moveDistance(this, -55, debugEnabled); //brings the first block to the human player
+        robotUtils.moveDistance(this, 55, debugEnabled); 
     }
 }
 
