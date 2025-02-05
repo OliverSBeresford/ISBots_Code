@@ -220,7 +220,7 @@ public class ISBotsTeleOp extends LinearOpMode {
             And if the user presses B it reveres the servo to spit out the element.*/
 
             // If you click a (do only once before you take your finger off)
-            if (gamepad1.a && !lastAState) {
+            if ((gamepad1.a || gamepad1.cross) && !lastAState) {
                 if (intakePower == INTAKE_OFF) {
                     intakePower = INTAKE_COLLECT;
                 } else if (intakePower == INTAKE_COLLECT) {
@@ -228,7 +228,7 @@ public class ISBotsTeleOp extends LinearOpMode {
                 }
             }
             // If you click x (do only once before you take your finger off)
-            else if (gamepad1.x && !lastXState) {
+            else if ((gamepad1.x || gamepad1.square) && !lastXState) {
                 if (wristPosition == WRIST_FOLDED_IN || wristPosition == WRIST_FOLDED_LEFT) {
                     wristPosition = WRIST_FOLDED_OUT;
                 } else if (wristPosition == WRIST_FOLDED_OUT && lastWristPosition == WRIST_FOLDED_IN) {
@@ -240,7 +240,7 @@ public class ISBotsTeleOp extends LinearOpMode {
                 }
             }
             // If you click b (do only once before you take your finger off)
-            if (gamepad1.b && !lastBState) {
+            if ((gamepad1.b || gamepad1.circle) && !lastBState) {
                 if (intakePower == INTAKE_OFF) {
                     intakePower = INTAKE_DEPOSIT;
                 } else if (intakePower == INTAKE_DEPOSIT) {
@@ -260,9 +260,9 @@ public class ISBotsTeleOp extends LinearOpMode {
                 }
             }
             // Saving the states of each button
-            lastAState = gamepad1.a;
-            lastBState = gamepad1.b;
-            lastXState = gamepad1.x;
+            lastAState = (gamepad1.a || gamepad1.cross);
+            lastBState = (gamepad1.b || gamepad1.circle);
+            lastXState = (gamepad1.x || gamepad1.square);
             lastLStickState = gamepad1.left_stick_button;
 
             /* Arm control */

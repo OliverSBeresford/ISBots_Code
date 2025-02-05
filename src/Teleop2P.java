@@ -220,11 +220,11 @@ public class TeleOp2P extends LinearOpMode {
             And if the user presses B it reveres the servo to spit out the element.*/
 
             // If you are holding a, the intake is collecting
-            if (gamepad2.a) {
+            if ((gamepad2.a || gamepad2.cross)) {
                 intakePower = INTAKE_COLLECT;
             }
             // If you are holding b, the intake is depositing
-            else if (gamepad2.b) {
+            else if ((gamepad2.b || gamepad2.circle)) {
                 intakePower = INTAKE_DEPOSIT;
             }
             // If you click nothing, the intake is off
@@ -233,7 +233,7 @@ public class TeleOp2P extends LinearOpMode {
             }
 
             // If you click x (do only once before you take your finger off)
-            if (gamepad2.x && !lastXState) {
+            if ((gamepad2.x || gamepad2.square) && !lastXState) {
                 if (wristPosition == WRIST_FOLDED_IN || wristPosition == WRIST_FOLDED_LEFT) {
                     wristPosition = WRIST_FOLDED_OUT;
                 } else if (wristPosition == WRIST_FOLDED_OUT && lastWristPosition == WRIST_FOLDED_IN) {
@@ -258,9 +258,9 @@ public class TeleOp2P extends LinearOpMode {
                 }
             }
             // Saving the states of each button
-            lastAState = gamepad2.a;
-            lastBState = gamepad2.b;
-            lastXState = gamepad2.x;
+            lastAState = (gamepad2.a || gamepad2.cross);
+            lastBState = (gamepad2.b || gamepad2.circle);
+            lastXState = (gamepad2.x || gamepad2.square);
             lastLStickState = gamepad2.left_stick_button;
 
             /* Arm control */
