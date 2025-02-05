@@ -22,22 +22,8 @@ public class Park extends LinearOpMode {
     private CRServo intake;
     private ColorSensor colorSensor;
     private RobotUtils robotUtils;
-    private static final int colorThreshold = 500; // Minimum color value for a block to be detected
-
-    // Field dimensions and obstacle location
-    private static final double FIELD_SIZE = 144.0; // 144 inches (12x12 ft field)
-    private static final double OBSTACLE_WIDTH = 44.5; // in inches
-    private static final double OBSTACLE_HEIGHT = 26.5; // in inches
-
-    /* This constant is the number of encoder ticks for each degree of rotation of the arm.
-    To find this, we first need to consider the total gear reduction powering our arm.
-    First, we have an external 20t:100t (5:1) reduction created by two spur gears.
-    But we also have an internal gear reduction in our motor.
-    The motor we use for this arm is a 117RPM Yellow Jacket. Which has an internal gear
-    reduction of ~50.9:1. (more precisely it is 250047/4913:1)
-    We can multiply these two ratios together to get our final reduction of ~254.47:1.
-    The motor's encoder counts 28 times per rotation. So in total you should see about 7125.16
-    counts per rotation of the arm. We divide that by 360 to get the counts per degree. */
+    
+    /* This constant is the number of encoder ticks for each degree of rotation of the arm. */
     final double ARM_TICKS_PER_DEGREE =
             28 // number of encoder ticks per rotation of the bare motor
                     * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
@@ -45,10 +31,6 @@ public class Park extends LinearOpMode {
                     * 1/360.0; // we want ticks per degree, not per rotation
 
 
-    /* These constants hold the position that the arm is commanded to run to.
-    These are relative to where the arm was located when you start the OpMode. So make sure the
-    arm is reset to collapsed inside the robot before you start the program.
-    */
 
     final double ARM_COLLAPSED_INTO_ROBOT  = 0;
     final double ARM_COLLECT               = 250 * ARM_TICKS_PER_DEGREE;
@@ -68,12 +50,6 @@ public class Park extends LinearOpMode {
     final double WRIST_FOLDED_IN   = 0.8333;
     final double WRIST_FOLDED_OUT  = 0.5;
     final double WRIST_FOLDED_LEFT = 0.1667;
-
-    // Values for detecting blocks
-    private static final int[] RED_RGB = {4000, 2000, 1200};
-    private static final int[] BLUE_RGB = {1000, 2200, 4500};
-    private static final int[] YELLOW_RGB = {6500, 8500, 2000};
-    private static final int TOLERANCE = 500;
 
     /* Variables that are used to set the arm to a specific position */
     double armPosition = (int) ARM_COLLAPSED_INTO_ROBOT;
@@ -126,10 +102,6 @@ public class Park extends LinearOpMode {
 
         // Wait for the game to start
         waitForStart();
-
-        armPosition = (int) ARM_SEARCH;
-        wristPosition = WRIST_FOLDED_OUT;
-        intakePower = INTAKE_COLLECT;
 
         imu.resetYaw();
         robotUtils.turnDegrees(this, -90, true);
