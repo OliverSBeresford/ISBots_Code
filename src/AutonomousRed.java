@@ -24,22 +24,13 @@ public class AutonomousRed extends LinearOpMode {
     private ColorSensor colorSensor;
     private RobotUtils robotUtils;
     private Pose3D position;
-    private static final int colorThreshold = 500; // Minimum color value for a block to be detected
 
     // Field dimensions and obstacle location
     private static final double FIELD_SIZE = 144.0; // 144 inches (12x12 ft field)
     private static final double OBSTACLE_WIDTH = 44.5; // in inches
     private static final double OBSTACLE_HEIGHT = 26.5; // in inches
 
-    /* This constant is the number of encoder ticks for each degree of rotation of the arm.
-    To find this, we first need to consider the total gear reduction powering our arm.
-    First, we have an external 20t:100t (5:1) reduction created by two spur gears.
-    But we also have an internal gear reduction in our motor.
-    The motor we use for this arm is a 117RPM Yellow Jacket. Which has an internal gear
-    reduction of ~50.9:1. (more precisely it is 250047/4913:1)
-    We can multiply these two ratios together to get our final reduction of ~254.47:1.
-    The motor's encoder counts 28 times per rotation. So in total you should see about 7125.16
-    counts per rotation of the arm. We divide that by 360 to get the counts per degree. */
+    /* This constant is the number of encoder ticks for each degree of rotation of the arm. */
     final double ARM_TICKS_PER_DEGREE =
             28 // number of encoder ticks per rotation of the bare motor
                     * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
@@ -70,12 +61,6 @@ public class AutonomousRed extends LinearOpMode {
     final double WRIST_FOLDED_IN   = 0.8333;
     final double WRIST_FOLDED_OUT  = 0.5;
     final double WRIST_FOLDED_LEFT = 0.1667;
-
-    // Values for detecting blocks
-    private static final int[] RED_RGB = {4000, 2000, 1200};
-    private static final int[] BLUE_RGB = {1000, 2200, 4500};
-    private static final int[] YELLOW_RGB = {6500, 8500, 2000};
-    private static final int TOLERANCE = 500;
 
     /* Variables that are used to set the arm to a specific position */
     double armPosition = (int) ARM_COLLAPSED_INTO_ROBOT;
@@ -134,21 +119,23 @@ public class AutonomousRed extends LinearOpMode {
         wristPosition = WRIST_FOLDED_OUT;
         intakePower = INTAKE_COLLECT;
 
-        while (opModeIsActive()) {
-            robotUtils.turnTowardsBlob(this, true);
-            intake.setPower(INTAKE_COLLECT);
-            while (!robotUtils.isRedBlock() && opModeIsActive()) {
-                leftDrive.setPower(0.1);
-                rightDrive.setPower(0.1);
-                sleep(10);
-            }
-            robotUtils.navigateTo(this, (int) ARM_SCORE_SAMPLE_IN_LOW, new double[]{-24, 71.5, 0}, robotUtils.RED_BASKET, intakePower, false);
-            intake.setPower(INTAKE_DEPOSIT);
+        double[] startCoordinates = {-10, 68, 0};
+        double[] targetCoordinates = {0, 40, 0};
+        double dx = targetCoordinates[0] - startCoordinates[0];
+        double dy = targetCoordinates[1] - startCoordinates[1];
+        double distance = Math.hypot(dx, dy);
+        double angle = (Math.toDegrees(Math.atan2(dy, dx)) - 90 + 360) % 360; // Normalize to [0, 360]
 
-            robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT);
-
-            sleep(30000);
-        }
+        // Hook specimen at the beginning of the game
+        robotUtils.turnDegrees(this, angle, true); // Turn to face the target
+        robotUtils.moveDistance(this, distance, true);
+        robotUtils.moveDistance(this, 10, true); // Align
+        robotUtils.moveDistance(this, -10, true); // Back up
+        robotUtils.moveArm(this, (int) ARM_SCORE_SAMPLE_IN_LOW); // Move arm to right position
+        robotUtils.moveDistance(this, -10, true); // Back up
+        intake.setPower(INTAKE_DEPOSIT); // Deposit specimen
+        sleep(200); // Wait for deposit
+        robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT); // Move arm back to original position
     }
 }
 
