@@ -213,6 +213,7 @@ public class RobotUtils {
             opMode.telemetry.update();
         }
 
+        distanceInInches = correctDistance(distanceInInches);
         int ticksPerRevolution = ((((1 + (46 / 17))) * (1 + (46 / 11))) * 28); // Got this from GOBilda
         double wheelDiameter = 3.77953; // In inches
         double wheelCircumference = Math.PI * wheelDiameter;
@@ -719,6 +720,13 @@ public class RobotUtils {
         opMode.telemetry.update();
     }
     /* *********************** End of telemetry helper functions *********************** */
+
+    /* *********************** Math *********************** */
+    private double correctDistance(double distance) {
+        return 1.24593 * distance - 1.05246;
+    }
+
+    /* *********************** End math functions *********************** */
     
     /* *********************** Classes used to return specific data from the RobotUtils class *********************** */
     public static class VisionComponents {
