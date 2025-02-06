@@ -117,8 +117,10 @@ public class AutonomousRed extends LinearOpMode {
         waitForStart();
 
         armPosition = (int) ARM_SEARCH;
-        wristPosition = WRIST_FOLDED_OUT;
-        intakePower = INTAKE_COLLECT;
+        wristPosition = WRIST_FOLDED_IN;
+        intakePower = INTAKE_OFF;
+
+        wrist.setPosition(wristPosition);
 
         robotUtils.setYawIMU(20);
 
@@ -127,15 +129,14 @@ public class AutonomousRed extends LinearOpMode {
         double dx = targetCoordinates[0] - startCoordinates[0];
         double dy = targetCoordinates[1] - startCoordinates[1];
         double distance = Math.hypot(dx, dy);
-        double angle = (Math.toDegrees(Math.atan2(dy, dx)) - 90 + 360) % 360; // Normalize to [0, 360]
+        double angle = Math.toDegrees(Math.atan2(-dx, dy)) - robotUtils.getYawIMU(); // Normalize to [0, 360]
 
-        // Hook specimen at the beginning of the game
-        robotUtils.turnDegrees(this, angle, debugEnabled); // Turn to face the target
         robotUtils.driveStraight(this, distance, 0.5, robotUtils.getYawIMU(), debugEnabled);
-        robotUtils.driveStraight(this, 10, 0.5, robotUtils.getYawIMU(), debugEnabled); // Align
-        robotUtils.driveStraight(this, -15, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
+        robotUtils.driveStraight(this, 30, 0.5, robotUtils.getYawIMU(), debugEnabled); // Align
+        robotUtils.driveStraight(this, -6, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
         robotUtils.moveArm(this, (int) ARM_SCORE_SAMPLE_IN_LOW); // Move arm to right position
-        robotUtils.driveStraight(this, -10, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
+        wrist.setPosition(wristPosition);
+        robotUtils.driveStraight(this, -5, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
         intake.setPower(INTAKE_DEPOSIT); // Deposit specimen
         sleep(200); // Wait for deposit
         robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT); // Move arm back to original position
