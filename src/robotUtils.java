@@ -689,8 +689,7 @@ public class RobotUtils {
                isWithinRange(colorSensor.green(), YELLOW_RGB[1], TOLERANCE) &&
                isWithinRange(colorSensor.blue(), YELLOW_RGB[2], TOLERANCE);
     }
-    /* *********************** End color sensing functions *********************** */
-
+    
     public boolean isAnyColorBlock() {
         return isRedBlock() || isBlueBlock() || isYellowBlock();
     }
@@ -702,6 +701,7 @@ public class RobotUtils {
     private boolean isWithinRange(double actual, double target, double tolerance) {
         return Math.abs(actual - target) <= tolerance;
     }
+    /* *********************** End color sensing functions *********************** */
 
     /* *********************** Telemetry helper functions *********************** */
     private void print(LinearOpMode opMode, String message, boolean debugEnabled) {
