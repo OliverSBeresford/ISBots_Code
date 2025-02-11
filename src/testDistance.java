@@ -211,6 +211,8 @@ public class TestDistance extends LinearOpMode {
             telemetry.addData("Orientation", imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES));
             telemetry.update();
 
+            sleep(10);
+
         }
     }
 }
