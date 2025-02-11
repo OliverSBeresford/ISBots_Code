@@ -136,7 +136,7 @@ public class RobotUtils {
         double turnPower;
         double previousError;
         double kP = 1.0 / 150.0; // Adjusted proportional constant
-        double minPower = 0.1; // Lower minimum power for fine adjustments
+        double minPower = 0.2; // Lower minimum power for fine adjustments
         double maxPower = 0.8;
     
         // Get starting angle and calculate target heading
@@ -156,9 +156,9 @@ public class RobotUtils {
             currentAngle = getYawIMU();
             error = targetHeading - currentAngle;
 
-            if (error < -360) {
+            if (error < -180) {
                 error += 360;
-            } else if (error > 360) {
+            } else if (error > 180) {
                 error -= 360;
             }
 
