@@ -135,8 +135,9 @@ public class RobotUtils {
         double error = 0.0;
         double turnPower;
         double previousError;
-        double kP = 0.01; // Adjusted proportional constant
-        double power = 0.2; // Lower minimum power for fine adjustments
+        double kP = 1.0 / 150.0; // Adjusted proportional constant
+        double minPower = 0.1; // Lower minimum power for fine adjustments
+        double maxPower = 0.8;
     
         // Get starting angle and calculate target heading
         double startingAngle = getYawIMU();
@@ -167,9 +168,14 @@ public class RobotUtils {
     
             // Calculate turn power with proportional control
             turnPower = kP * error;
+
+            if (Math.abs(turnPower) > maxPower) {
+                turnPower = Math.copySign(maxPower, turnPower);
+            } else if (Math.abs(turnPower) < minPower) {
+                turnPower = Math.copySign(minPower, turnPower);
+            }
     
             // Apply motor power
-            turnPower = Math.copySign(power, turnPower); // temporary
             leftDrive.setPower(-turnPower);
             rightDrive.setPower(turnPower);
     
@@ -181,6 +187,7 @@ public class RobotUtils {
                 opMode.telemetry.addData("Turn Power", turnPower);
                 opMode.telemetry.addData("Starting Angle", startingAngle);
                 opMode.telemetry.addData("Previous Error", previousError);
+                opMode.telemetry.addData("kP", kP);
                 opMode.telemetry.update();
             }
         } while (Math.abs(error) > 5 && opMode.opModeIsActive()); // Slightly relaxed threshold
