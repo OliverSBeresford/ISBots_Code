@@ -730,6 +730,9 @@ public class RobotUtils {
 
     /* *********************** Math *********************** */
     private double correctDistance(double distance) {
+        if (distance < 0) {
+            return 1.23896 * distance + 1.8399;
+        }
         return 1.24593 * distance - 1.05246;
     }
 
