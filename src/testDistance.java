@@ -173,29 +173,52 @@ public class TestDistance extends LinearOpMode {
 
         /* Run until the driver presses stop */
         while (opModeIsActive()) {
+            double distance = 0;
+            double totalDist = 0;
+            double power = 0.5;
+            boolean debugEnabled = true;
+
             if (gamepad1.x) {
-                robotUtils.driveStraight(this, 10, 0.5, 0, true);
+                distance = 10;
+                power = 0.5;
             }
             else if (gamepad1.a) {
-                robotUtils.driveStraight(this, 15, 0.5, 0, true);
+                distance = 15;
+                power = 0.5;
             }
             else if (gamepad1.b) {
-                robotUtils.driveStraight(this, 10, 0.5, 0, true);
+                distance = 10;
+                power = 0.5;
             }
             else if (gamepad1.y) {
-                robotUtils.driveStraight(this, 5, 0.5, 0, true);
+                distance = 5;
+                power = 0.5;
             }
             if (gamepad1.dpad_up) {
-                robotUtils.driveStraight(this, 30, 0.5, 0, true);
+                distance = 30;
+                power = 0.5;
             }
             else if (gamepad1.dpad_down) {
-                robotUtils.driveStraight(this, 40, 0.5, 0, true);
+                distance = 40;
+                power = 0.5;
             }
             else if (gamepad1.dpad_left) {
-                robotUtils.driveStraight(this, 50, 0.5, 0, true);
+                distance = 50;
+                power = 0.5;
             }
             else if (gamepad1.dpad_right) {
-                robotUtils.driveStraight(this, 60, 0.5, 0, true);
+                distance = 60;
+                power = 0.5;
+            }
+
+            if (distance != 0 && power != 0) {
+                if (gamepad1.right_trigger > 0.2) {
+                    distance = -distance;
+                }
+
+                robotUtils.driveStraight(this, distance, power, 0, debugEnabled);
+                distance = 0;
+                totalDist += distance;
             }
 
             /* Check to see if our arm is over the current limit, and report via telemetry. */
