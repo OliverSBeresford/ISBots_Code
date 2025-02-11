@@ -176,6 +176,27 @@ public class TestDistance extends LinearOpMode {
             if (gamepad1.x) {
                 robotUtils.driveStraight(this, 10, 0.5, 0, true);
             }
+            else if (gamepad1.a) {
+                robotUtils.driveStraight(this, 15, 0.5, 0, true);
+            }
+            else if (gamepad1.b) {
+                robotUtils.driveStraight(this, 10, 0.5, 0, true);
+            }
+            else if (gamepad1.y) {
+                robotUtils.driveStraight(this, 5, 0.5, 0, true);
+            }
+            if (gamepad1.dpad_up) {
+                robotUtils.driveStraight(this, 30, 0.5, 0, true);
+            }
+            else if (gamepad1.dpad_down) {
+                robotUtils.driveStraight(this, 40, 0.5, 0, true);
+            }
+            else if (gamepad1.dpad_left) {
+                robotUtils.driveStraight(this, 50, 0.5, 0, true);
+            }
+            else if (gamepad1.dpad_right) {
+                robotUtils.driveStraight(this, 60, 0.5, 0, true);
+            }
 
             /* Check to see if our arm is over the current limit, and report via telemetry. */
             if (((DcMotorEx) armMotor).isOverCurrent()){
