@@ -580,6 +580,9 @@ public class RobotUtils {
         // Display the number of AprilTags detected.
         if (debugEnabled) {
             opMode.telemetry.addData("# AprilTags Detected", JavaUtil.listLength(myAprilTagDetections));
+            if (JavaUtil.listLength(myAprilTagDetections) == 0) {
+                opMode.telemetry.update();
+            }
         }
 
         // Iterate through list and call a function to return info for the first recognized AprilTag.
