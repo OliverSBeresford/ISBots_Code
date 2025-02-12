@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import com.qualcomm.robotcore.hardware.ColorSensor;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 @Autonomous(name = "Red autonomous", group = "Linear Opmode")
 public class AutonomousRed extends LinearOpMode {
@@ -74,6 +75,7 @@ public class AutonomousRed extends LinearOpMode {
         double intakePower = INTAKE_OFF;
         double[] coordinates;
         boolean debugEnabled = true;
+        Pose3D pose = null;
 
         // Initialize hardware
         leftDrive = hardwareMap.get(DcMotor.class, "leftMotor");
@@ -125,8 +127,8 @@ public class AutonomousRed extends LinearOpMode {
 
         robotUtils.setYawIMU(20);
 
-        double[] startCoordinates = {-18, 68, 0};
-        double[] targetCoordinates = {0, 40, 0};
+        double[] startCoordinates = {18, -68, 0};
+        double[] targetCoordinates = {0, -24, 0};
         double dx = targetCoordinates[0] - startCoordinates[0];
         double dy = targetCoordinates[1] - startCoordinates[1];
         double distance = Math.hypot(dx, dy);
@@ -143,8 +145,20 @@ public class AutonomousRed extends LinearOpMode {
 
         // Drive the blocks to the human player
         robotUtils.turnDegrees(this, -90, debugEnabled); //Turn to the right
-        robotUtils.driveStraight(this, 40, 0.5, robotUtils.getYawIMU(), debugEnabled); //moves forward
+        // robotUtils.driveStraight(this, 40, 0.5, robotUtils.getYawIMU(), debugEnabled); //moves forward
         robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT); // Move arm back to original position
+        
+        // Calculating distance to next position
+        pose = robotUtils.getData(this, robotUtils.aprilTagProcessor, debugEnabled);
+        targetCoordinates = new double[] {45, 0, 0};
+        while (pose == null) {
+            pose = robotUtils.getData(this, robotUtils.aprilTagProcessor, debugEnabled);
+            sleep(50);
+        }
+        sleep(10000); // temporary
+        dx = targetCoordinates[0] - pose.getPosition().x;
+        dy = targetCoordinates[1] - pose.getPosition().y;
+        
         robotUtils.turnDegrees(this, 90, debugEnabled); //Turn to the left
         robotUtils.driveStraight(this, 20, 0.5, robotUtils.getYawIMU(), debugEnabled); //Moves forward
         robotUtils.turnDegrees(this, 10, debugEnabled);
