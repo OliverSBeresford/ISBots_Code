@@ -49,6 +49,7 @@ public class AutonomousRed extends LinearOpMode {
     final double ARM_CLEAR_BARRIER         = 230 * ARM_TICKS_PER_DEGREE;
     final double ARM_SCORE_SPECIMEN        = 160 * ARM_TICKS_PER_DEGREE;
     final double ARM_SCORE_SAMPLE_IN_LOW   = 160 * ARM_TICKS_PER_DEGREE;
+    final double CLIP_SPECIMEN             = 180 * ARM_TICKS_PER_DEGREE;
     final double ARM_ATTACH_HANGING_HOOK   = 120 * ARM_TICKS_PER_DEGREE;
     final double ARM_WINCH_ROBOT           = 15  * ARM_TICKS_PER_DEGREE;
 
@@ -131,20 +132,19 @@ public class AutonomousRed extends LinearOpMode {
         double distance = Math.hypot(dx, dy);
         double angle = Math.toDegrees(Math.atan2(-dx, dy)) - robotUtils.getYawIMU(); // Normalize to [0, 360]
 
-        robotUtils.driveStraight(this, distance, 0.5, robotUtils.getYawIMU(), debugEnabled);
-        robotUtils.driveStraight(this, 30, 0.5, robotUtils.getYawIMU(), debugEnabled); // Align
-        robotUtils.driveStraight(this, -6, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
-        robotUtils.moveArm(this, (int) ARM_SCORE_SAMPLE_IN_LOW); // Move arm to right position
         wrist.setPosition(wristPosition);
+        robotUtils.driveStraight(this, distance, 0.5, robotUtils.getYawIMU(), debugEnabled);
+        robotUtils.driveStraight(this, 15, 0.5, robotUtils.getYawIMU(), debugEnabled); // Align
+        robotUtils.driveStraight(this, -10, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
+        robotUtils.moveArm(this, (int) CLIP_SPECIMEN); // Move arm to right position  
         robotUtils.driveStraight(this, -5, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
         intake.setPower(INTAKE_DEPOSIT); // Deposit specimen
-        sleep(200); // Wait for deposit
-        robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT); // Move arm back to original position
 
 
         // Drive the blocks to the human player
         robotUtils.turnDegrees(this, -90, debugEnabled); //Turn to the right
-        robotUtils.driveStraight(this, 48, 0.5, robotUtils.getYawIMU(), debugEnabled); //moves forward
+        robotUtils.driveStraight(this, 40, 0.5, robotUtils.getYawIMU(), debugEnabled); //moves forward
+        robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT); // Move arm back to original position
         robotUtils.turnDegrees(this, 90, debugEnabled); //Turn to the left
         robotUtils.driveStraight(this, 20, 0.5, robotUtils.getYawIMU(), debugEnabled); //Moves forward
         robotUtils.turnDegrees(this, 10, debugEnabled);
