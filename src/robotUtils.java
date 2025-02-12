@@ -534,7 +534,7 @@ public class RobotUtils {
     /* *********************** These functions relate to the Vision system. *********************** */
     public void initAprilTag(LinearOpMode opMode) {
         // Camera position and orientation
-        Position cameraPosition = new Position(DistanceUnit.CM, 5, 21.5, 18, 0);
+        Position cameraPosition = new Position(DistanceUnit.CM, -10, 0, 7, 0);
         // YawPitchRollAngles(AngleUnit angleUnit, double yaw, double pitch, double roll, long acquisitionTime)
         YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 0, -90, 0, 0);
 
@@ -625,7 +625,7 @@ public class RobotUtils {
 
     public void initCamera(LinearOpMode opMode) {
         // Camera position and orientation
-        Position cameraPosition = new Position(DistanceUnit.CM, 5, 21.5, 18, 0);
+        Position cameraPosition = new Position(DistanceUnit.CM, -10, 0, 7, 0);
         // YawPitchRollAngles(AngleUnit angleUnit, double yaw, double pitch, double roll, long acquisitionTime)
         YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 0, -90, 0, 0);
 

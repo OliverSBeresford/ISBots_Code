@@ -66,7 +66,7 @@ public class Positioning extends LinearOpMode {
         // to +/-90 degrees if it's vertical, or 180 degrees if it's upside-down.
         
         // Position(DistanceUnit unit, double x, double y, double z, long acquisitionTime)
-        cameraPosition = new Position(DistanceUnit.CM, 5, 21.5, 18, 0);
+        cameraPosition = new Position(DistanceUnit.CM, -10, 0, 7, 0);
         // YawPitchRollAngles(AngleUnit angleUnit, double yaw, double pitch, double roll, long acquisitionTime)
         cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES, 0, -90, 0, 0);
         // Initialize AprilTag before waitForStart.
