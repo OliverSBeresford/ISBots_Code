@@ -330,6 +330,8 @@ public class ISBotsTeleOp extends LinearOpMode {
 
             if (armPosition == ARM_WINCH_ROBOT) {
                 ((DcMotorEx) armMotor).setVelocity(1000);
+                leftDrive.setPower(-0.3);
+                rightDrive.setPower(-0.3);
             } else {
                 ((DcMotorEx) armMotor).setVelocity(5000);
             }
