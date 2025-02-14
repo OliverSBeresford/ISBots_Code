@@ -70,7 +70,7 @@ public class RobotUtils {
     private static final int GRID_SIZE = 12;
     private static final double CELL_SIZE = 12; // Inches
 
-    // Define the 6x6 grid. 1 = obstacle, 0 = traversable
+    // Define the 12x12 grid. 1 = obstacle, 0 = traversable
     private static final int[][] FIELD = {
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
