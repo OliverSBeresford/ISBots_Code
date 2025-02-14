@@ -183,11 +183,11 @@ public class TestDistance extends LinearOpMode {
                 power = 0.5;
             }
             else if (gamepad1.a) {
-                distance = 15;
+                distance = 12;
                 power = 0.5;
             }
             else if (gamepad1.b) {
-                distance = 10;
+                distance = 24;
                 power = 0.5;
             }
             else if (gamepad1.y) {
