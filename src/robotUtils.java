@@ -49,9 +49,9 @@ public class RobotUtils {
     public final int[] YELLOW_RGB = {6500, 8500, 2000};
     public final int TOLERANCE = 500;
     public final int colorThreshold = 500;
-    public final int BLUE = ColorRange.BLUE;
-    public final int RED = ColorRange.RED;
-    public int color = null;
+    public final ColorRange BLUE = ColorRange.BLUE;
+    public final ColorRange RED = ColorRange.RED;
+    public ColorRange color = null;
 
     // Vision constants
     public final int CAMERA_RESOLUTION_WIDTH =  640;
@@ -121,7 +121,7 @@ public class RobotUtils {
         colorSensor = _colorSensor;
     }
 
-    public void setColor(int _color) {
+    public void setColor(ColorRange _color) {
         color = _color;
     }
     /* *********************** End initialization functions *********************** */
