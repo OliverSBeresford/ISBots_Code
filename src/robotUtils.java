@@ -73,6 +73,34 @@ public class RobotUtils {
     private static final int GRID_SIZE = 12;
     private static final double CELL_SIZE = 12; // Inches
 
+    public final double ARM_TICKS_PER_DEGREE =
+            28 // number of encoder ticks per rotation of the bare motor
+                    * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
+                    * 100.0 / 20.0 // This is the external gear reduction, a 20T pinion gear that drives a 100T hub-mount gear
+                    * 1/360.0; // we want ticks per degree, not per rotation
+
+    // Constant for arm and servo positioning
+    public final double ARM_COLLAPSED_INTO_ROBOT  = 0;
+    public final double ARM_COLLECT               = 250 * ARM_TICKS_PER_DEGREE;
+    public final double ARM_CLEAR_BARRIER         = 230 * ARM_TICKS_PER_DEGREE;
+    public final double ARM_SCORE_SPECIMEN        = 160 * ARM_TICKS_PER_DEGREE;
+    public final double ARM_SCORE_SAMPLE_IN_LOW   = 160 * ARM_TICKS_PER_DEGREE;
+    public final double ARM_ATTACH_HANGING_HOOK   = 120 * ARM_TICKS_PER_DEGREE;
+    public final double ARM_WINCH_ROBOT           = 15  * ARM_TICKS_PER_DEGREE;
+
+    /* Variables to store the speed the intake servo should be set at to intake, and deposit game elements. */
+    public final double INTAKE_COLLECT    = -1.0;
+    public final double INTAKE_OFF        =  0.0;
+    public final double INTAKE_DEPOSIT    =  0.5;
+
+    /* Variables to store the positions that the wrist should be set to when folding in, or folding out. */
+    public final double WRIST_FOLDED_IN   = 0.8333;
+    public final double WRIST_FOLDED_OUT  = 0.5;
+    public final double WRIST_FOLDED_LEFT = 0.1667;
+
+    /* A number in degrees that the triggers can adjust the arm position by */
+    public final double FUDGE_FACTOR = 15 * ARM_TICKS_PER_DEGREE;
+
     // Define the 12x12 grid. 1 = obstacle, 0 = traversable
     private static final int[][] FIELD = {
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -441,6 +469,52 @@ public class RobotUtils {
         if (debugEnabled) {
             opMode.telemetry.addData("Turning Complete", "Aligned with Blob");
             opMode.telemetry.update();
+        }
+    }
+
+    public void pickUpDrive(LinearOpMode opMode, boolean debugEnabled) {
+        intakePower = INTAKE
+
+        while (opModeIsActive()) {
+            opMode.telemetry.update();
+
+            // Setting the intake power
+            intake.setPower(intakePower);
+            
+            /* Changing the wrist's position */
+            wrist.setPosition(wristPosition);
+            
+            // Move the arm to the correct position
+            moveArm((int) armPosition);
+
+            // Step 2: Detect the color of the block
+            if (isYellowBlock()) {
+                telemetry.addLine("Yellow block detected!");
+                // moveToBasket(-72, -72); // We are red
+            } else if (isBlueBlock()) {
+                telemetry.addLine("Blue block detected!");
+                // moveToBasket(72, 72); // Moving to the other basket, but in practice we would just leave it if we are the red team
+            } else if (isRedBlock()) {
+                telemetry.addLine("Red block detected!");
+                // moveToBasket(-72, -72); // We are red
+            } else {
+                telemetry.addLine("Red: " + colorSensor.red() + " Green: " + colorSensor.green() + " Blue: " + colorSensor.blue());
+
+                leftDrive.setPower(0.1);
+                rightDrive.setPower(0.1);
+
+                continue;
+            }
+
+            armPosition = (int) ARM_COLLAPSED_INTO_ROBOT;
+            wristPosition = WRIST_FOLDED_IN;
+            intakePower = INTAKE_OFF;
+
+            intake.setPower(intakePower);
+
+            robotUtils.navigateTo(this, (int) ARM_SCORE_SAMPLE_IN_LOW, robotUtils.RED_OBSERVATION, robotUtils.RED_RED_BASKET, 0, true);
+
+            intake.setPower(INTAKE_DEPOSIT);
         }
     }
     
