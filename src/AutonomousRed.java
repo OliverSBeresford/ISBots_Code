@@ -148,15 +148,29 @@ public class AutonomousRed extends LinearOpMode {
         intake.setPower(INTAKE_DEPOSIT); // Deposit specimen
 
 
-        // Drive the blocks to the human player
+        /* *********************** Drive the blocks to the human player *********************** */ 
         robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT); // Move arm back to original position
+        // Intake off
         intake.setPower(INTAKE_OFF);
+        // Turn towards the wall where the blocks are
         robotUtils.turnDegrees(this, -90, debugEnabled); //Turn to the right
-        robotUtils.driveStraight(this, 35, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
-        robotUtils.turnDegrees(this, 90, debugEnabled); //Turn to the right
-        robotUtils.driveStraight(this, 30, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
-        robotUtils.turnDegrees(this, 20, debugEnabled); //Turn to the right
-        robotUtils.driveStraight(this, -50, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
+        // Drive to just before the first block
+        robotUtils.driveStraight(this, 35, 0.5, robotUtils.getYawIMU(), debugEnabled);
+        // Turn 90 degrees left and move forward to get in front of the block
+        robotUtils.turnDegrees(this, 90, debugEnabled);
+        robotUtils.driveStraight(this, 30, 0.5, robotUtils.getYawIMU(), debugEnabled);
+        // Turn to align with the block and the observation zone
+        robotUtils.turnDegrees(this, 20, debugEnabled);
+        // Drive to the observation zone through the block to drag it along
+        robotUtils.driveStraight(this, -50, 0.5, robotUtils.getYawIMU(), debugEnabled);
+        // Turn toward the next block (but not aligned)
+        robotUtils.turnDegrees(this, 10, debugEnabled);
+        // Move past the second block
+        robotUtils.driveStraight(this, 50, 0.5, robotUtils.getYawIMU(), debugEnabled);
+        // Align with the second block and move to the observation zone
+        robotUtils.turnDegrees(this, -5, debugEnabled);
+        robotUtils.driveStraight(this, -50, 0.5, robotUtils.getYawIMU(), debugEnabled);
+        /* *********************** Drive the blocks to the human player *********************** */ 
     }
 }
 
