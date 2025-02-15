@@ -150,39 +150,13 @@ public class AutonomousRed extends LinearOpMode {
 
         // Drive the blocks to the human player
         robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT); // Move arm back to original position
-        intake.setPower(INTAKE_OFF); // Deposit specimen
-        robotUtils.turnDegrees(this, -76, debugEnabled); //Turn to the right
-
-        // Trying to correct positioning with apriltags
-        pose = robotUtils.getData(this, robotUtils.aprilTagProcessor, debugEnabled);
-        if (pose != null) {
-            robotUtils.turnToHeading(this, imu, -76, debugEnabled);
-            sleep(50);
-        }
-
-
-        // Going to pick up a block
-        robotUtils.pickUpDrive(this, 0.5, debugEnabled);
-        robotUtils.driveStraight(this, -10, 0.5, robotUtils.getYawIMU(), debugEnabled);
+        intake.setPower(INTAKE_OFF);
         robotUtils.turnDegrees(this, -90, debugEnabled); //Turn to the right
-        robotUtils.driveStraight(this, 20, 0.5, robotUtils.getYawIMU(), debugEnabled);
-        intake.setPower(INTAKE_YEET);
-        
-        // Waiting to deposit sample
-        sleep(1000);
-
-        robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT);
-        wrist.setPosition(WRIST_FOLDED_IN);
-
-        // // Turning towards second block
-        // robotUtils.turnToHeading(this, imu, -10, debugEnabled);
-        // robotUtils.pickUpDrive(this, 0.5, debugEnabled);
-        // robotUtils.turnToHeading(this, imu, 180, debugEnabled);
-        // robotUtils.driveStraight(this, 20, 0.5, robotUtils.getYawIMU(), debugEnabled);
-        // intake.setPower(INTAKE_YEET);
-        
-        // // Waiting to deposit sample
-        // sleep(1000);
+        robotUtils.driveStraight(this, 35, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
+        robotUtils.turnDegrees(this, 90, debugEnabled); //Turn to the right
+        robotUtils.driveStraight(this, 30, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
+        robotUtils.turnDegrees(this, 20, debugEnabled); //Turn to the right
+        robotUtils.driveStraight(this, -50, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
     }
 }
 
