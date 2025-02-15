@@ -105,7 +105,17 @@ public class BlobDrive extends LinearOpMode {
         wristPosition = WRIST_FOLDED_OUT;
         intakePower = INTAKE_COLLECT;
 
+        sleep(2000);
+
         robotUtils.turnTowardsBlob(this, true);
+        wrist.setPosition(WRIST_FOLDED_OUT);
+        robotUtils.moveArm(this, (int) ARM_COLLECT);
+
+
+        leftDrive.setPower(0.2);
+        rightDrive.setPower(0.2);
+        intake.setPower(INTAKE_COLLECT);
+        
     }
 
 }
