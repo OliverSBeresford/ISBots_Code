@@ -491,6 +491,9 @@ public class RobotUtils {
         double wristPosition = WRIST_FOLDED_OUT;
         double armPosition = ARM_COLLECT;
 
+        // Changing the wrist's position
+        wrist.setPosition(wristPosition);
+
         // Putting arm down to collect
         moveArm(opMode, (int) armPosition);
 
