@@ -156,7 +156,7 @@ public class AutonomousRed extends LinearOpMode {
         // Calculating distance to next position
         pose = robotUtils.getData(this, robotUtils.aprilTagProcessor, debugEnabled);
         targetCoordinates = new double[] {45, 0, 0};
-        while (pose == null) {
+        while (pose == null && opModeIsActive()) {
             pose = robotUtils.getData(this, robotUtils.aprilTagProcessor, debugEnabled);
             sleep(50);
         }
