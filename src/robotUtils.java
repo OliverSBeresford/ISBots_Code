@@ -432,23 +432,17 @@ public class RobotUtils {
         RotatedRect boxFit = blob.getBoxFit();
         double blobX = boxFit.center.x;
     
-        // Calculate the initial angle to the blob
+        // Calculate angle to blob
         double angleToBlob = ((blobX - CAMERA_RESOLUTION_WIDTH / 2.0) / CAMERA_RESOLUTION_WIDTH) * CAMERA_FOV_HORIZONTAL;
     
-        // Adjust for camera offset without knowing distance
-        final double CAMERA_X_OFFSET = -3.93701; // 3... inches to the left of center
-        final double CORRECTION_FACTOR = 1.2; // Tuned empirically
-    
-        double adjustedAngle = angleToBlob + Math.toDegrees(Math.atan(CAMERA_X_OFFSET / (CORRECTION_FACTOR * Math.abs(angleToBlob) + 1)));
-    
-        // Turn the robot by the adjusted angle
-        turnDegrees(opMode, -adjustedAngle, debugEnabled);
+        // Get current heading and compute target heading
+        turnDegrees(opMode, -angleToBlob, debugEnabled);
     
         if (debugEnabled) {
             opMode.telemetry.addData("Turning Complete", "Aligned with Blob");
             opMode.telemetry.update();
         }
-    }    
+    }
     
 
     public void turnToHeading(LinearOpMode opMode, IMU imu, double targetHeading, boolean debugEnabled) {
