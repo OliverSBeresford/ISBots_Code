@@ -166,7 +166,7 @@ public class AutonomousRed extends LinearOpMode {
         dy = targetCoordinates[1] - currentPosition[1];
         
         robotUtils.driveStraight(this, dx, 0.5, robotUtils.getYawIMU(), debugEnabled); //Moves forward
-        robotUtils.turnDegrees(this, -90, debugEnabled);
+        robotUtils.turnDegrees(this, 90, debugEnabled);
         robotUtils.driveStraight(this, dy, 0.5, robotUtils.getYawIMU(), debugEnabled); //brings the first block to the human player
         
         // At this point, we should be at {45, 0, 0}
