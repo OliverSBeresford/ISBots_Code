@@ -93,6 +93,7 @@ public class AutonomousRed extends LinearOpMode {
         robotUtils = new RobotUtils();
         robotUtils.setHardware(leftDrive, rightDrive, imu, intake, wrist, armMotor);
         robotUtils.setColor(robotUtils.RED);
+        robotUtils.setColorSensor(colorSensor);
         robotUtils.initCamera(this);
 
         // Set motor directions
@@ -134,7 +135,6 @@ public class AutonomousRed extends LinearOpMode {
         double dx = targetCoordinates[0] - startCoordinates[0];
         double dy = targetCoordinates[1] - startCoordinates[1];
         double distance = Math.hypot(dx, dy);
-        double angle = Math.toDegrees(Math.atan2(-dx, dy)) - robotUtils.getYawIMU(); // Normalize to [0, 360]
 
         wrist.setPosition(wristPosition);
         robotUtils.driveStraight(this, distance, 0.5, robotUtils.getYawIMU(), debugEnabled);
@@ -150,28 +150,33 @@ public class AutonomousRed extends LinearOpMode {
         // Drive the blocks to the human player
         robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT); // Move arm back to original position
         intake.setPower(INTAKE_OFF); // Deposit specimen
-        robotUtils.turnDegrees(this, -90, debugEnabled); //Turn to the right
+        robotUtils.turnDegrees(this, -80, debugEnabled); //Turn to the right
         // robotUtils.driveStraight(this, 40, 0.5, robotUtils.getYawIMU(), debugEnabled); //moves forward
+
+        robotUtils.pickUpDrive(this, 0.5, debugEnabled);
+        robotUtils.turnDegrees(this, -90, debugEnabled); //Turn to the right
+        robotUtils.driveStraight(this, 20, 0.5, robotUtils.getYawIMU(), debugEnabled);
+        intake.setPower(INTAKE_DEPOSIT);
         
         // Calculating distance to next position
-        pose = robotUtils.getData(this, robotUtils.aprilTagProcessor, debugEnabled);
-        targetCoordinates = new double[] {45, 0, 0};
-        while (pose == null && opModeIsActive()) {
-            pose = robotUtils.getData(this, robotUtils.aprilTagProcessor, debugEnabled);
-            sleep(50);
-        }
-        sleep(10000); // temporary
-        currentPosition = new double[] {pose.getPosition().x, pose.getPosition().y, pose.getPosition().z};
-        dx = targetCoordinates[0] - currentPosition[0];
-        dy = targetCoordinates[1] - currentPosition[1];
+        // pose = robotUtils.getData(this, robotUtils.aprilTagProcessor, debugEnabled);
+        // targetCoordinates = new double[] {45, 0, 0};
+        // while (pose == null && opModeIsActive()) {
+        //     pose = robotUtils.getData(this, robotUtils.aprilTagProcessor, debugEnabled);
+        //     sleep(50);
+        // }
+        // sleep(10000); // temporary
+        // currentPosition = new double[] {pose.getPosition().x, pose.getPosition().y, pose.getPosition().z};
+        // dx = targetCoordinates[0] - currentPosition[0];
+        // dy = targetCoordinates[1] - currentPosition[1];
         
-        robotUtils.driveStraight(this, dx, 0.5, robotUtils.getYawIMU(), debugEnabled); //Moves forward
-        robotUtils.turnDegrees(this, 90, debugEnabled);
-        robotUtils.driveStraight(this, dy, 0.5, robotUtils.getYawIMU(), debugEnabled); //brings the first block to the human player
+        // robotUtils.driveStraight(this, dx, 0.5, robotUtils.getYawIMU(), debugEnabled); //Moves forward
+        // robotUtils.turnDegrees(this, 90, debugEnabled);
+        // robotUtils.driveStraight(this, dy, 0.5, robotUtils.getYawIMU(), debugEnabled); //brings the first block to the human player
         
-        // At this point, we should be at {45, 0, 0}
-        robotUtils.turnDegrees(this, -10, debugEnabled);
-        robotUtils.driveStraight(this, -55, 0.5, robotUtils.getYawIMU(), debugEnabled); 
+        // // At this point, we should be at {45, 0, 0}
+        // robotUtils.turnDegrees(this, -10, debugEnabled);
+        // robotUtils.driveStraight(this, -55, 0.5, robotUtils.getYawIMU(), debugEnabled); 
     }
 }
 
