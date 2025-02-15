@@ -150,7 +150,7 @@ public class AutonomousRed extends LinearOpMode {
         // Drive the blocks to the human player
         robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT); // Move arm back to original position
         intake.setPower(INTAKE_OFF); // Deposit specimen
-        robotUtils.turnDegrees(this, -80, debugEnabled); //Turn to the right
+        robotUtils.turnDegrees(this, -70, debugEnabled); //Turn to the right
         // robotUtils.driveStraight(this, 40, 0.5, robotUtils.getYawIMU(), debugEnabled); //moves forward
 
         robotUtils.pickUpDrive(this, 0.5, debugEnabled);
