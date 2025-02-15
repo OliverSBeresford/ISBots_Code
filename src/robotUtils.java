@@ -49,6 +49,9 @@ public class RobotUtils {
     public final int[] YELLOW_RGB = {6500, 8500, 2000};
     public final int TOLERANCE = 500;
     public final int colorThreshold = 500;
+    public final int BLUE = ColorRange.BLUE;
+    public final int RED = ColorRange.RED;
+    public int color = null;
 
     // Vision constants
     public final int CAMERA_RESOLUTION_WIDTH =  640;
@@ -116,6 +119,10 @@ public class RobotUtils {
 
     public void setColorSensor(ColorSensor _colorSensor) {
         colorSensor = _colorSensor;
+    }
+
+    public void setColor(int _color) {
+        color = _color;
     }
     /* *********************** End initialization functions *********************** */
 
@@ -624,6 +631,10 @@ public class RobotUtils {
     }
 
     public void initCamera(LinearOpMode opMode) {
+        if (color == null) {
+            color = RED;
+        }
+
         // Camera position and orientation
         Position cameraPosition = new Position(DistanceUnit.CM, -10, 0, 7, 0);
         // YawPitchRollAngles(AngleUnit angleUnit, double yaw, double pitch, double roll, long acquisitionTime)
@@ -647,7 +658,7 @@ public class RobotUtils {
         // Build a "Color Locator" vision processor based on the ColorBlobLocatorProcessor class.
         ColorBlobLocatorProcessor.Builder myColorBlobLocatorProcessorBuilder = new ColorBlobLocatorProcessor.Builder();
         // - Specify the color range you are looking for.
-        myColorBlobLocatorProcessorBuilder.setTargetColorRange(ColorRange.BLUE);
+        myColorBlobLocatorProcessorBuilder.setTargetColorRange(color);
         // 50% width/height square centered on screen
         myColorBlobLocatorProcessorBuilder.setRoi(ImageRegion.asUnityCenterCoordinates(-1.0, 0.0, 1.0, -1.0));
         // - Define which contours are included.

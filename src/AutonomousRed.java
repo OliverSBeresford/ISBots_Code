@@ -92,6 +92,7 @@ public class AutonomousRed extends LinearOpMode {
         // Initialize the robot utility class to have access to useful methods
         robotUtils = new RobotUtils();
         robotUtils.setHardware(leftDrive, rightDrive, imu, intake, wrist, armMotor);
+        robotUtils.setColor(robotUtils.RED);
         robotUtils.initCamera(this);
 
         // Set motor directions
@@ -129,6 +130,7 @@ public class AutonomousRed extends LinearOpMode {
 
         double[] startCoordinates = {18, -68, 0};
         double[] targetCoordinates = {0, -24, 0};
+        double[] currentPosition = {18, -68, 0};
         double dx = targetCoordinates[0] - startCoordinates[0];
         double dy = targetCoordinates[1] - startCoordinates[1];
         double distance = Math.hypot(dx, dy);
@@ -136,6 +138,8 @@ public class AutonomousRed extends LinearOpMode {
 
         wrist.setPosition(wristPosition);
         robotUtils.driveStraight(this, distance, 0.5, robotUtils.getYawIMU(), debugEnabled);
+        currentPosition[0] += dx;
+        currentPosition[1] += dy;
         robotUtils.driveStraight(this, 15, 0.5, robotUtils.getYawIMU(), debugEnabled); // Align
         robotUtils.driveStraight(this, -10, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
         robotUtils.moveArm(this, (int) CLIP_SPECIMEN); // Move arm to right position  
@@ -144,9 +148,10 @@ public class AutonomousRed extends LinearOpMode {
 
 
         // Drive the blocks to the human player
+        robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT); // Move arm back to original position
+        intake.setPower(INTAKE_OFF); // Deposit specimen
         robotUtils.turnDegrees(this, -90, debugEnabled); //Turn to the right
         // robotUtils.driveStraight(this, 40, 0.5, robotUtils.getYawIMU(), debugEnabled); //moves forward
-        robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT); // Move arm back to original position
         
         // Calculating distance to next position
         pose = robotUtils.getData(this, robotUtils.aprilTagProcessor, debugEnabled);
@@ -156,14 +161,17 @@ public class AutonomousRed extends LinearOpMode {
             sleep(50);
         }
         sleep(10000); // temporary
-        dx = targetCoordinates[0] - pose.getPosition().x;
-        dy = targetCoordinates[1] - pose.getPosition().y;
+        currentPosition = new double[] {pose.getPosition().x, pose.getPosition().y, pose.getPosition().z};
+        dx = targetCoordinates[0] - currentPosition[0];
+        dy = targetCoordinates[1] - currentPosition[1];
         
-        robotUtils.turnDegrees(this, 90, debugEnabled); //Turn to the left
-        robotUtils.driveStraight(this, 20, 0.5, robotUtils.getYawIMU(), debugEnabled); //Moves forward
-        robotUtils.turnDegrees(this, 10, debugEnabled);
-        robotUtils.driveStraight(this, -55, 0.5, robotUtils.getYawIMU(), debugEnabled); //brings the first block to the human player
-        robotUtils.driveStraight(this, 55, 0.5, robotUtils.getYawIMU(), debugEnabled); 
+        robotUtils.driveStraight(this, dx, 0.5, robotUtils.getYawIMU(), debugEnabled); //Moves forward
+        robotUtils.turnDegrees(this, -90, debugEnabled);
+        robotUtils.driveStraight(this, dy, 0.5, robotUtils.getYawIMU(), debugEnabled); //brings the first block to the human player
+        
+        // At this point, we should be at {45, 0, 0}
+        robotUtils.turnDegrees(this, -10, debugEnabled);
+        robotUtils.driveStraight(this, -55, 0.5, robotUtils.getYawIMU(), debugEnabled); 
     }
 }
 

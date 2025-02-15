@@ -73,6 +73,7 @@ public class BlobDrive extends LinearOpMode {
         // Initialize the robot utility class to have access to useful methods
         robotUtils = new RobotUtils();
         robotUtils.setHardware(leftDrive, rightDrive, imu, intake, wrist, armMotor);
+        robotUtils.setColor(robotUtils.RED);
         robotUtils.initCamera(this);
 
         // Set motor directions
