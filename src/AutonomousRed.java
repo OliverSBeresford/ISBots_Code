@@ -163,6 +163,7 @@ public class AutonomousRed extends LinearOpMode {
 
         // Going to pick up a block
         robotUtils.pickUpDrive(this, 0.5, debugEnabled);
+        robotUtils.driveStraight(this, -10, 0.5, robotUtils.getYawIMU(), debugEnabled);
         robotUtils.turnDegrees(this, -90, debugEnabled); //Turn to the right
         robotUtils.driveStraight(this, 20, 0.5, robotUtils.getYawIMU(), debugEnabled);
         intake.setPower(INTAKE_YEET);
@@ -170,15 +171,18 @@ public class AutonomousRed extends LinearOpMode {
         // Waiting to deposit sample
         sleep(1000);
 
-        // Turning towards second block
-        robotUtils.turnToHeading(this, imu, -10, debugEnabled);
-        robotUtils.pickUpDrive(this, 0.5, debugEnabled);
-        robotUtils.turnToHeading(this, imu, 180, debugEnabled);
-        robotUtils.driveStraight(this, 20, 0.5, robotUtils.getYawIMU(), debugEnabled);
-        intake.setPower(INTAKE_YEET);
+        robotUtils.moveArm(this, (int) ARM_COLLAPSED_INTO_ROBOT);
+        wrist.setPosition(WRIST_FOLDED_IN);
+
+        // // Turning towards second block
+        // robotUtils.turnToHeading(this, imu, -10, debugEnabled);
+        // robotUtils.pickUpDrive(this, 0.5, debugEnabled);
+        // robotUtils.turnToHeading(this, imu, 180, debugEnabled);
+        // robotUtils.driveStraight(this, 20, 0.5, robotUtils.getYawIMU(), debugEnabled);
+        // intake.setPower(INTAKE_YEET);
         
-        // Waiting to deposit sample
-        sleep(1000);
+        // // Waiting to deposit sample
+        // sleep(1000);
     }
 }
 
