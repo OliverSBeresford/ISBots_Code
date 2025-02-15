@@ -307,7 +307,7 @@ public class RobotUtils {
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Setting arm speed to max unless you're hanging the robot
-        if (armPosition == ARM_WINCH_ROBOT) {
+        if (position == ARM_WINCH_ROBOT) {
             ((DcMotorEx) armMotor).setVelocity(1000);
         } else {
             ((DcMotorEx) armMotor).setVelocity(5000);
@@ -482,7 +482,7 @@ public class RobotUtils {
 
     public void pickUpDrive(LinearOpMode opMode, double power, boolean debugEnabled) {
         // Making sure we're not using null values
-        if (intake == null || leftDrive == null || rightDrive == null || armMotor == null) {
+        if (intake == null || leftDrive == null || rightDrive == null || armMotor == null || colorSensor == null) {
             print(opMode, "Null parameters", debugEnabled);
             return;
         }
@@ -492,7 +492,7 @@ public class RobotUtils {
         double armPosition = ARM_COLLECT;
 
         // Putting arm down to collect
-        moveArm((int) armPosition);
+        moveArm(opMode, (int) armPosition);
 
         while (opMode.opModeIsActive()) {
             // Setting the intake power
