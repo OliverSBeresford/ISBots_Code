@@ -304,7 +304,14 @@ public class RobotUtils {
 
         armMotor.setTargetPosition(position); // Adjust based on arm's vertical position for baskets
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setVelocity(2100);
+
+        // Setting arm speed to max unless you're hanging the robot
+        if (armPosition == ARM_WINCH_ROBOT) {
+            ((DcMotorEx) armMotor).setVelocity(1000);
+        } else {
+            ((DcMotorEx) armMotor).setVelocity(5000);
+        }
+        
         while (armMotor.isBusy() && opMode.opModeIsActive()) {
             // Wait for the arm to reach the position
             opMode.sleep(10);
