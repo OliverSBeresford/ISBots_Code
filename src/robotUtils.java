@@ -311,7 +311,7 @@ public class RobotUtils {
         } else {
             ((DcMotorEx) armMotor).setVelocity(5000);
         }
-        
+
         while (armMotor.isBusy() && opMode.opModeIsActive()) {
             // Wait for the arm to reach the position
             opMode.sleep(10);
@@ -479,50 +479,60 @@ public class RobotUtils {
         }
     }
 
-    public void pickUpDrive(LinearOpMode opMode, boolean debugEnabled) {
-        intakePower = INTAKE
+    public void pickUpDrive(LinearOpMode opMode, double power, boolean debugEnabled) {
+        // Making sure we're not using null values
+        if (intake == null || leftDrive == null || rightDrive == null || armMotor == null) {
+            print(opMode, "Null parameters", debugEnabled);
+            return;
+        }
 
-        while (opModeIsActive()) {
-            opMode.telemetry.update();
+        double intakePower = INTAKE_COLLECT;
+        double wristPosition = WRIST_FOLDED_OUT;
+        double armPosition = ARM_COLLECT;
 
+        // Putting arm down to collect
+        moveArm((int) armPosition);
+
+        while (opMode.opModeIsActive()) {
             // Setting the intake power
             intake.setPower(intakePower);
             
-            /* Changing the wrist's position */
+            // Changing the wrist's position
             wrist.setPosition(wristPosition);
-            
-            // Move the arm to the correct position
-            moveArm((int) armPosition);
 
             // Step 2: Detect the color of the block
             if (isYellowBlock()) {
-                telemetry.addLine("Yellow block detected!");
-                // moveToBasket(-72, -72); // We are red
-            } else if (isBlueBlock()) {
-                telemetry.addLine("Blue block detected!");
-                // moveToBasket(72, 72); // Moving to the other basket, but in practice we would just leave it if we are the red team
-            } else if (isRedBlock()) {
-                telemetry.addLine("Red block detected!");
-                // moveToBasket(-72, -72); // We are red
+                print(opMode, "Yellow block detected!", debugEnabled);
+
+                // Stopping the loop
+                break;
+            } else if (isBlueBlock() && color == BLUE) {
+                print(opMode, "Blue block detected!", debugEnabled);
+                
+                // Stopping the loop
+                break;
+            } else if (isRedBlock() && color == RED) {
+                print(opMode, "Red block detected!", debugEnabled);
+                
+                // Stopping the loop
+                break;
             } else {
-                telemetry.addLine("Red: " + colorSensor.red() + " Green: " + colorSensor.green() + " Blue: " + colorSensor.blue());
-
-                leftDrive.setPower(0.1);
-                rightDrive.setPower(0.1);
-
-                continue;
+                print(opMode, "Red: " + colorSensor.red() + " Green: " + colorSensor.green() + " Blue: " + colorSensor.blue(), debugEnabled);
+                
+                // Advancing to the block
+                leftDrive.setPower(power);
+                rightDrive.setPower(power);
             }
-
-            armPosition = (int) ARM_COLLAPSED_INTO_ROBOT;
-            wristPosition = WRIST_FOLDED_IN;
-            intakePower = INTAKE_OFF;
-
-            intake.setPower(intakePower);
-
-            robotUtils.navigateTo(this, (int) ARM_SCORE_SAMPLE_IN_LOW, robotUtils.RED_OBSERVATION, robotUtils.RED_RED_BASKET, 0, true);
-
-            intake.setPower(INTAKE_DEPOSIT);
         }
+        // Turning off the intake
+        intakePower = INTAKE_OFF;
+        intake.setPower(intakePower);
+
+        // Stopping the motors
+        leftDrive.setPower(power);
+        rightDrive.setPower(power);
+
+        return;
     }
     
 
