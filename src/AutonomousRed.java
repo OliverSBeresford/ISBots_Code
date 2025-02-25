@@ -48,6 +48,7 @@ public class AutonomousRed extends LinearOpMode {
     final double ARM_COLLECT               = 250 * ARM_TICKS_PER_DEGREE;
     final double ARM_SEARCH                = 250 * ARM_TICKS_PER_DEGREE;
     final double ARM_CLEAR_BARRIER         = 230 * ARM_TICKS_PER_DEGREE;
+    final double ARM_DOWN                  = 180 * ARM_TICKS_PER_DEGREE;
     final double ARM_SCORE_SPECIMEN        = 160 * ARM_TICKS_PER_DEGREE;
     final double ARM_SCORE_SAMPLE_IN_LOW   = 160 * ARM_TICKS_PER_DEGREE;
     final double CLIP_SPECIMEN             = 180 * ARM_TICKS_PER_DEGREE;
@@ -146,6 +147,7 @@ public class AutonomousRed extends LinearOpMode {
         robotUtils.moveArm(this, (int) CLIP_SPECIMEN); // Move arm to right position  
         robotUtils.driveStraight(this, -5, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
         intake.setPower(INTAKE_DEPOSIT); // Deposit specimen
+        robotUtils.moveArm(this, (int) ARM_DOWN);
 
 
         /* *********************** Drive the blocks to the human player *********************** */ 
@@ -155,21 +157,23 @@ public class AutonomousRed extends LinearOpMode {
         // Turn towards the wall where the blocks are
         robotUtils.turnDegrees(this, -90, debugEnabled); //Turn to the right
         // Drive to just before the first block
-        robotUtils.driveStraight(this, 35, 0.5, robotUtils.getYawIMU(), debugEnabled);
+        robotUtils.driveStraight(this, 36, 0.5, robotUtils.getYawIMU(), debugEnabled);
         // Turn 90 degrees left and move forward to get in front of the block
-        robotUtils.turnDegrees(this, 90, debugEnabled);
-        robotUtils.driveStraight(this, 30, 0.5, robotUtils.getYawIMU(), debugEnabled);
+        robotUtils.turnDegrees(this, -90, debugEnabled);
+        robotUtils.driveStraight(this, -35, 0.5, robotUtils.getYawIMU(), debugEnabled);
         // Turn to align with the block and the observation zone
-        robotUtils.turnDegrees(this, 20, debugEnabled);
+        robotUtils.turnDegrees(this, 22, debugEnabled);
         // Drive to the observation zone through the block to drag it along
-        robotUtils.driveStraight(this, -50, 0.5, robotUtils.getYawIMU(), debugEnabled);
-        // Turn toward the next block (but not aligned)
-        robotUtils.turnDegrees(this, 10, debugEnabled);
-        // Move past the second block
         robotUtils.driveStraight(this, 50, 0.5, robotUtils.getYawIMU(), debugEnabled);
-        // Align with the second block and move to the observation zone
-        robotUtils.turnDegrees(this, -5, debugEnabled);
-        robotUtils.driveStraight(this, -50, 0.5, robotUtils.getYawIMU(), debugEnabled);
+        // Back up a bit
+        // robotUtils.driveStraight(this, -10, 0.5, robotUtils.getYawIMU(), debugEnabled);
+        // // Turn towards the second block
+        // robotUtils.turnDegrees(this, -20, debugEnabled);
+        // // Move past the second block
+        // robotUtils.driveStraight(this, -40, 0.5, robotUtils.getYawIMU(), debugEnabled);
+        // // Align with the second block and move to the observation zone
+        // robotUtils.turnDegrees(this, -5, debugEnabled);
+        // robotUtils.driveStraight(this, 50, 0.5, robotUtils.getYawIMU(), debugEnabled);
         /* *********************** Drive the blocks to the human player *********************** */ 
     }
 }
