@@ -32,6 +32,6 @@ public class Samscode extends LinearOpMode {
     private RobotUtils robotUtils;
 
     public void runOpMode() {
-
-        https://prod.liveshare.vsengsaas.visualstudio.com/join?97E6E18ADAE79DA2CA95ED05C4C9E1DC4246
+        waitForStar
+        https://prod.liveshare.vsengsaas.visualstudio.com/join?213141DA67081D7DFD0ED36862C3A72BD80A
     }
