@@ -20,7 +20,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-@TeleOp
+@Autonomous
 public class SamsCode extends LinearOpMode {
     /* Declare OpMode members. */
     public DcMotor  leftDrive   = null; //the left drivetrain motor
@@ -35,6 +35,7 @@ public class SamsCode extends LinearOpMode {
         rightDrive = hardwareMap.get(DcMotor.class, "rightMotor");
         imu = hardwareMap.get(IMU.class, "imu");
         
+        robotUtils = new RobotUtils();
         robotUtils.setHardware(leftDrive, rightDrive, imu);
 
         waitForStart();
