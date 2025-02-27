@@ -34,6 +34,13 @@ public class SamsCode extends LinearOpMode {
         leftDrive = hardwareMap.get(DcMotor.class, "leftMotor");
         rightDrive = hardwareMap.get(DcMotor.class, "rightMotor");
         imu = hardwareMap.get(IMU.class, "imu");
+
+        
+        // Set motor directions
+        leftDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         
         robotUtils = new RobotUtils();
         robotUtils.setHardware(leftDrive, rightDrive, imu);
