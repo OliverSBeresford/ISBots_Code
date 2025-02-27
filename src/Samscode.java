@@ -21,17 +21,24 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @TeleOp
-public class Samscode extends LinearOpMode {
+public class SamsCode extends LinearOpMode {
     /* Declare OpMode members. */
     public DcMotor  leftDrive   = null; //the left drivetrain motor
     public DcMotor  rightDrive  = null; //the right drivetrain motor
-    public DcMotor  armMotor    = null; //the arm motor
-    public CRServo  intake      = null; //the active intake servo
-    public Servo    wrist       = null; //the wrist servo
+    public IMU imu = null;
     private ColorSensor colorSensor;
     private RobotUtils robotUtils;
 
     public void runOpMode() {
-        waitForStar
-        https://prod.liveshare.vsengsaas.visualstudio.com/join?213141DA67081D7DFD0ED36862C3A72BD80A
+        // Initializing the motors and stuff idk cool
+        leftDrive = hardwareMap.get(DcMotor.class, "leftMotor");
+        rightDrive = hardwareMap.get(DcMotor.class, "rightMotor");
+        imu = hardwareMap.get(IMU.class, "imu");
+        
+        robotUtils.setHardware(leftDrive, rightDrive, imu);
+
+        waitForStart();
+
+        robotUtils.driveStraight(this, 20, 0.8, 0, false);
     }
+}
