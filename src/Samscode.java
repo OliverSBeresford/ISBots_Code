@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import org.firstinspires.ftc.teamcode.RobotUtils;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -48,5 +49,11 @@ public class SamsCode extends LinearOpMode {
         waitForStart();
 
         robotUtils.driveStraight(this, 20, 0.8, 0, false);
+        
+        leftDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightDrive.setDirection(DcMotor.Direction.FORWARD);
+        robotUtils.driveStraight(this, 10, 0.8, 0, true);
+
+        sleep(1000);
     }
 }
