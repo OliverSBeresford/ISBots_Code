@@ -563,6 +563,59 @@ public class RobotUtils {
         return 0;
     }
 
+    public void turnAndReport(LinearOpMode opMode, double power, boolean debugEnabled) {
+        // Ensure hardware is initialized
+        if (leftDrive == null || rightDrive == null || imu == null) {
+            return;
+        }
+
+        // Reset encoders and IMU yaw
+        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        imu.resetYaw();
+
+        // Set motors to run using encoders
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Start turning
+        leftDrive.setPower(power);
+        rightDrive.setPower(-power);
+
+        // Variables to store initial positions and yaw
+        int initialLeftPosition = leftDrive.getCurrentPosition();
+        int initialRightPosition = rightDrive.getCurrentPosition();
+        double initialYaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+
+        while (opMode.opModeIsActive()) {
+            // Current positions and yaw
+            int currentLeftPosition = leftDrive.getCurrentPosition();
+            int currentRightPosition = rightDrive.getCurrentPosition();
+            double currentYaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+
+            // Calculate the change in positions and yaw
+            int deltaLeftPosition = currentLeftPosition - initialLeftPosition;
+            int deltaRightPosition = currentRightPosition - initialRightPosition;
+            double deltaYaw = currentYaw - initialYaw;
+
+            // Calculate degrees per encoder tick
+            double degreesPerTickLeft = deltaYaw / deltaLeftPosition;
+            double degreesPerTickRight = deltaYaw / deltaRightPosition;
+
+            // Report to telemetry
+            opMode.telemetry.addData("Degrees per Tick (Left)", degreesPerTickLeft);
+            opMode.telemetry.addData("Degrees per Tick (Right)", degreesPerTickRight);
+            opMode.telemetry.update();
+
+            // Allow time for motors to respond
+            opMode.sleep(200);
+        }
+
+        // Stop motors
+        leftDrive.setPower(0);
+        rightDrive.setPower(0);
+    }
+
     /* *********************** End robot physical behavior functions *********************** */
 
     /* *********************** These functions relate to pathfinding *********************** */
