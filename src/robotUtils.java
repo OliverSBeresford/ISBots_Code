@@ -568,11 +568,12 @@ public class RobotUtils {
         double deltaYaw;
 
         // Variables to store the running average
-        double totalTicksLeft = 0;
-        double totalTicksRight = 0;
-        double totalDeltaYaw = 0;
-        double totalTicksPerDegreeLeft = 0;
-        double totalTicksPerDegreeRight = 0;
+        double averageTicksLeft = 0;
+        double averageTicksRight = 0;
+        double averageDeltaYaw = 0;
+        double averageTicksPerDegreeLeft = 0;
+        double averageTicksPerDegreeRight = 0;
+        int count = 0;
 
         while (opMode.opModeIsActive()) {
             // Current positions and yaw
@@ -598,15 +599,20 @@ public class RobotUtils {
             double ticksPerDegreeRight = deltaRightPosition / deltaYaw;
 
             // Update running totals
-            totalDeltaYaw += deltaYaw;
-            totalTicksLeft += deltaLeftPosition;
-            totalTicksRight += deltaRightPosition;
-            totalTicksPerDegreeLeft = totalTicksLeft / totalDeltaYaw;
-            totalTicksPerDegreeRight = totalTicksRight / totalDeltaYaw;
+            averageDeltaYaw = (averageDeltaYaw * count + deltaYaw) / (count + 1);
+            averageTicksLeft += (averageTicksLeft * count + deltaLeftPosition) / (count + 1);
+            averageTicksRight += (averageTicksRight * count + deltaLeftPosition) / (count + 1);
+            totalTicksPerDegreeLeft = averageTicksLeft / averageDeltaYaw;
+            totalTicksPerDegreeRight = averageTicksRight / averageDeltaYaw;
+
+            // Counts the number of iterations
+            count += 1;
             
             // Report to telemetry
             opMode.telemetry.addData("Ticks per degree (Left)", ticksPerDegreeLeft);
             opMode.telemetry.addData("Ticks per degree (Right)", ticksPerDegreeRight);
+            opMode.telemetry.addData("Average Ticks per degree (Left)", averageTicksPerDegreeLeft);
+            opMode.telemetry.addData("Average Ticks per degree (Right)", averageTicksPerDegreeRight);
             opMode.telemetry.update();
 
             // Allow time for motors to respond
