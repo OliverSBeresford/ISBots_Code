@@ -599,12 +599,12 @@ public class RobotUtils {
             double deltaYaw = currentYaw - initialYaw;
 
             // Calculate degrees per encoder tick
-            double degreesPerTickLeft = deltaYaw / deltaLeftPosition;
-            double degreesPerTickRight = deltaYaw / deltaRightPosition;
+            double ticksPerDegreeLeft =  deltaLeftPosition / deltaYaw;
+            double ticksPerDegreeRight = deltaRightPosition / deltaYaw;
 
             // Report to telemetry
-            opMode.telemetry.addData("Degrees per Tick (Left)", degreesPerTickLeft);
-            opMode.telemetry.addData("Degrees per Tick (Right)", degreesPerTickRight);
+            opMode.telemetry.addData("Ticks per degree (Left)", ticksPerDegreeLeft);
+            opMode.telemetry.addData("Ticks per degree (Right)", ticksPerDegreeRight);
             opMode.telemetry.update();
 
             // Allow time for motors to respond
