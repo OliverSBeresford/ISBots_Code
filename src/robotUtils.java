@@ -589,7 +589,6 @@ public class RobotUtils {
             totalDeltaYaw += deltaYaw;
             totalTicksLeft += deltaLeftPosition;
             totalTicksRight += deltaRightPosition;
-            count++;
             totalTicksPerDegreeLeft = totalTicksLeft / totalDeltaYaw;
             totalTicksPerDegreeRight = totalTicksRight / totalDeltaYaw;
             
