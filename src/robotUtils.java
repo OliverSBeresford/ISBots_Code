@@ -600,10 +600,10 @@ public class RobotUtils {
 
             // Update running totals
             averageDeltaYaw = (averageDeltaYaw * count + deltaYaw) / (count + 1);
-            averageTicksLeft += (averageTicksLeft * count + deltaLeftPosition) / (count + 1);
-            averageTicksRight += (averageTicksRight * count + deltaLeftPosition) / (count + 1);
-            totalTicksPerDegreeLeft = averageTicksLeft / averageDeltaYaw;
-            totalTicksPerDegreeRight = averageTicksRight / averageDeltaYaw;
+            averageTicksLeft = (averageTicksLeft * count + deltaLeftPosition) / (count + 1);
+            averageTicksRight = (averageTicksRight * count + deltaLeftPosition) / (count + 1);
+            averageTicksPerDegreeLeft = averageTicksLeft / averageDeltaYaw;
+            averageTicksPerDegreeRight = averageTicksRight / averageDeltaYaw;
 
             // Counts the number of iterations
             count += 1;
