@@ -555,11 +555,22 @@ public class RobotUtils {
         leftDrive.setPower(power);
         rightDrive.setPower(-power);
 
-        // Variables to store initial positions and yaw
-        int initialLeftPosition = leftDrive.getCurrentPosition();
-        int initialRightPosition = rightDrive.getCurrentPosition();
-        double initialYaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        // Variables to store previous positions and yaw
+        int previousLeftPosition = leftDrive.getCurrentPosition();
+        int previousRightPosition = rightDrive.getCurrentPosition();
+        double previousYaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
+        // Variables to store current positions and yaw
+        int currentLeftPosition;
+        int currentRightPosition;
+        double currentYaw;
+
+        // Variables to store changes
+        int deltaLeftPosition;
+        int deltaRightPosition;
+        double deltaYaw;
+
+        // Variables to store the running average
         double totalTicksLeft = 0;
         double totalTicksRight = 0;
         double totalDeltaYaw = 0;
@@ -568,14 +579,18 @@ public class RobotUtils {
 
         while (opMode.opModeIsActive()) {
             // Current positions and yaw
-            int currentLeftPosition = leftDrive.getCurrentPosition();
-            int currentRightPosition = rightDrive.getCurrentPosition();
-            double currentYaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            currentLeftPosition = leftDrive.getCurrentPosition();
+            currentRightPosition = rightDrive.getCurrentPosition();
+            currentYaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
             // Calculate the change in positions and yaw
-            int deltaLeftPosition = currentLeftPosition - initialLeftPosition;
-            int deltaRightPosition = currentRightPosition - initialRightPosition;
-            double deltaYaw = currentYaw - initialYaw;
+            deltaLeftPosition = currentLeftPosition - previousLeftPosition;
+            deltaRightPosition = currentRightPosition - previousRightPosition;
+            deltaYaw = currentYaw - previousYaw;
+
+            // Setting the current values to be in the previous variables
+            previousLeftPosition = currentLeftPosition;
+            previousRightPosition = currentRightPosition;
 
             // Account for wraparounds
             if (deltaYaw > 180) deltaYaw -= 360;
