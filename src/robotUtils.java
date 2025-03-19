@@ -544,6 +544,7 @@ public class RobotUtils {
         double currentHeading = getYawIMU();
         double turnAngle = targetHeading - currentHeading;
 
+        // Normalizing values
         if (turnAngle > 180) turnAngle -= 360;
         if (turnAngle < -180) turnAngle += 360;
 
@@ -551,12 +552,14 @@ public class RobotUtils {
     }
 
     public void setYawIMU(double yaw) {
+        // Sets the yaw by adding a permanent correction to the imu yaw reading
         if (imu != null) {
             imuCorrection = yaw - imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         }
     }
 
     public double getYawIMU() {
+        // Gets the yaw using the imu but incorporates the correction
         if (imu != null) {
             return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) + imuCorrection;
         }
@@ -587,6 +590,12 @@ public class RobotUtils {
         int initialRightPosition = rightDrive.getCurrentPosition();
         double initialYaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
+        double totalTicksLeft = 0;
+        double totalTicksRight = 0;
+        double totalDeltaYaw = 0;
+        double totalTicksPerDegreeLeft = 0;
+        double totalTicksPerDegreeRight = 0;
+
         while (opMode.opModeIsActive()) {
             // Current positions and yaw
             int currentLeftPosition = leftDrive.getCurrentPosition();
@@ -598,13 +607,27 @@ public class RobotUtils {
             int deltaRightPosition = currentRightPosition - initialRightPosition;
             double deltaYaw = currentYaw - initialYaw;
 
+            // Account for wraparounds
+            if (deltaYaw > 180) deltaYaw -= 360;
+            if (deltaYaw < -180) deltaYaw += 360;
+
             // Calculate degrees per encoder tick
-            double ticksPerDegreeLeft =  deltaLeftPosition / deltaYaw;
+            double ticksPerDegreeLeft = deltaLeftPosition / deltaYaw;
             double ticksPerDegreeRight = deltaRightPosition / deltaYaw;
 
+            // Update running totals
+            totalDeltaYaw += deltaYaw;
+            totalTicksLeft += deltaLeftPosition;
+            totalTicksRight += deltaRightPosition;
+            count++;
+            totalTicksPerDegreeLeft = totalTicksLeft / totalDeltaYaw;
+            totalTicksPerDegreeRight = totalTicksRight / totalDeltaYaw;
+            
             // Report to telemetry
             opMode.telemetry.addData("Ticks per degree (Left)", ticksPerDegreeLeft);
             opMode.telemetry.addData("Ticks per degree (Right)", ticksPerDegreeRight);
+            opMode.telemetry.addData("Average Ticks per degree (Left)", totalTicksPerDegreeLeft);
+            opMode.telemetry.addData("Average Ticks per degree (Right)", totalTicksPerDegreeRight);
             opMode.telemetry.update();
 
             // Allow time for motors to respond
