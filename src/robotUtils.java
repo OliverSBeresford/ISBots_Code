@@ -158,7 +158,7 @@ public class RobotUtils {
     /* *********************** These functions relate to physical behaior of the robot *********************** */
     public void turnDegrees(LinearOpMode opMode, double turnAngle, boolean debugEnabled) {
         // Ensure hardware is initialized
-        if (leftDrive == null || rightDrive == null || imu == null) {
+        if (leftDrive == null || rightDrive == null) {
             return;
         }
     
@@ -166,74 +166,44 @@ public class RobotUtils {
             opMode.telemetry.addData("Turning", turnAngle);
             opMode.telemetry.update();
         }
-    
-        double currentAngle;
-        double error = 0.0;
-        double turnPower;
-        double previousError;
-        double kP = 1.0 / 150.0; // Adjusted proportional constant
-        double minPower = 0.2; // Lower minimum power for fine adjustments
-        double maxPower = 0.8;
-    
-        // Get starting angle and calculate target heading
-        double startingAngle = getYawIMU();
-        double targetHeading = startingAngle + turnAngle;
-    
-        // Normalize target heading to -180 to 180 range
-        if (targetHeading > 180) {
-            targetHeading -= 360;
-        } else if (targetHeading < -180) {
-            targetHeading += 360;
-        }
-    
-        // Control loop for turning
-        do {
-            previousError = error;
-            currentAngle = getYawIMU();
-            error = targetHeading - currentAngle;
+        
+        double robotCircumference = Math.PI * 17.1;
+        double wheelDiameter = 3.77953; // In inches
+        double wheelCircumference = Math.PI * wheelDiameter;
+        double rotationsNeeded = robotCircumference / wheelCircumference;
+        int ticksPerRotation = ((((1 + (46 / 17))) * (1 + (46 / 11))) * 28); // Got this from GOBilda
+        int targetTicks = (int) (rotationsNeeded * ticksPerRotation);
 
-            if (error < -180) {
-                error += 360;
-            } else if (error > 180) {
-                error -= 360;
-            }
+        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-            if (isWithinRange(-previousError, error, 10)) {
-                error = previousError;
-            }
-    
-            // Calculate turn power with proportional control
-            turnPower = kP * error;
+        leftDrive.setTargetPosition(-targetTicks);
+        rightDrive.setTargetPosition(targetTicks);
 
-            if (Math.abs(turnPower) > maxPower) {
-                turnPower = Math.copySign(maxPower, turnPower);
-            } else if (Math.abs(turnPower) < minPower) {
-                turnPower = Math.copySign(minPower, turnPower);
-            }
+        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     
-            // Apply motor power
-            leftDrive.setPower(-turnPower);
-            rightDrive.setPower(turnPower);
+        double turnPower = 0.5; // Adjust power as needed
+        
+        leftDrive.setPower(turnPower);
+        rightDrive.setPower(turnPower);
     
+        while (leftDrive.isBusy() && rightDrive.isBusy() && opMode.opModeIsActive()) {
             // Debugging information
             if (debugEnabled) {
-                opMode.telemetry.addData("Target Heading", targetHeading);
-                opMode.telemetry.addData("Current Angle", currentAngle);
-                opMode.telemetry.addData("Error", error);
-                opMode.telemetry.addData("Turn Power", turnPower);
-                opMode.telemetry.addData("Starting Angle", startingAngle);
-                opMode.telemetry.addData("Previous Error", previousError);
-                opMode.telemetry.addData("kP", kP);
+                opMode.telemetry.addData("Target Ticks", targetTicks);
+                opMode.telemetry.addData("Left Position", leftDrive.getCurrentPosition());
+                opMode.telemetry.addData("Right Position", rightDrive.getCurrentPosition());
                 opMode.telemetry.update();
             }
-        } while (Math.abs(error) > 5 && opMode.opModeIsActive()); // Slightly relaxed threshold
+        }
     
         // Stop motors
         leftDrive.setPower(0);
         rightDrive.setPower(0);
     
         if (debugEnabled) {
-            opMode.telemetry.addData("Turn Complete", "Final Angle: " + getYawIMU());
+            opMode.telemetry.addData("Turn Complete", "Final Position: " + leftDrive.getCurrentPosition());
             opMode.telemetry.update();
         }
     }    

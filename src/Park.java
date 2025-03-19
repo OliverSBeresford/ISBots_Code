@@ -104,10 +104,7 @@ public class Park extends LinearOpMode {
         waitForStart();
 
         imu.resetYaw();
-        robotUtils.turnDegrees(this, -90, true);
-        robotUtils.turnDegrees(this, 20, true);
-        robotUtils.turnDegrees(this, 70, true);
-        robotUtils.turnDegrees(this, -180, true);
+        robotUtils.turnDegrees(this, -360, true);
         // robotUtils.driveStraight(this, 60, 0.5, -90, true);
     }
 }
