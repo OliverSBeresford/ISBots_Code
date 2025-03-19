@@ -572,6 +572,13 @@ public class RobotUtils {
             double ticksPerDegreeLeft =  deltaLeftPosition / deltaYaw;
             double ticksPerDegreeRight = deltaRightPosition / deltaYaw;
 
+            // Update running totals
+            totalDeltaYaw += deltaYaw;
+            totalTicksLeft += deltaLeftPosition;
+            totalTicksRight += deltaRightPosition;
+            totalTicksPerDegreeLeft = totalTicksLeft / totalDeltaYaw;
+            totalTicksPerDegreeRight = totalTicksRight / totalDeltaYaw;
+            
             // Report to telemetry
             opMode.telemetry.addData("Ticks per degree (Left)", ticksPerDegreeLeft);
             opMode.telemetry.addData("Ticks per degree (Right)", ticksPerDegreeRight);
