@@ -93,7 +93,7 @@ public class ISBotsTeleOp extends LinearOpMode {
     /* Variables to store the speed the intake servo should be set at to intake, and deposit game elements. */
     final double INTAKE_COLLECT    = -1.0;
     final double INTAKE_OFF        =  0.0;
-    final double INTAKE_DEPOSIT    =  0.5;
+    final double INTAKE_DEPOSIT    =  1;
 
     /* Variables to store the positions that the wrist should be set to when folding in, or folding out. */
     final double WRIST_FOLDED_IN   = 0.8333;
@@ -221,10 +221,10 @@ public class ISBotsTeleOp extends LinearOpMode {
 
             // If you click a (do only once before you take your finger off)
             if ((gamepad1.a || gamepad1.cross) && !lastAState) {
-                if (intakePower == INTAKE_OFF) {
-                    intakePower = INTAKE_COLLECT;
-                } else if (intakePower == INTAKE_COLLECT) {
+                if (intakePower == INTAKE_COLLECT) {
                     intakePower = INTAKE_OFF;
+                } else {
+                    intakePower = INTAKE_COLLECT;
                 }
             }
             // If you click x (do only once before you take your finger off)
@@ -241,10 +241,10 @@ public class ISBotsTeleOp extends LinearOpMode {
             }
             // If you click b (do only once before you take your finger off)
             if ((gamepad1.b || gamepad1.circle) && !lastBState) {
-                if (intakePower == INTAKE_OFF) {
-                    intakePower = INTAKE_DEPOSIT;
-                } else if (intakePower == INTAKE_DEPOSIT) {
+                if (intakePower == INTAKE_DEPOSIT) {
                     intakePower = INTAKE_OFF;
+                } else {
+                    intakePower = INTAKE_DEPOSIT;
                 }
             }
             // If you click the left joystick you'll go to the red basket
