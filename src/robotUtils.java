@@ -514,6 +514,7 @@ public class RobotUtils {
         double currentHeading = getYawIMU();
         double turnAngle = targetHeading - currentHeading;
 
+        // Normalizing values
         if (turnAngle > 180) turnAngle -= 360;
         if (turnAngle < -180) turnAngle += 360;
 
@@ -521,12 +522,14 @@ public class RobotUtils {
     }
 
     public void setYawIMU(double yaw) {
+        // Sets the yaw by adding a permanent correction to the imu yaw reading
         if (imu != null) {
             imuCorrection = yaw - imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         }
     }
 
     public double getYawIMU() {
+        // Gets the yaw using the imu but incorporates the correction
         if (imu != null) {
             return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) + imuCorrection;
         }
@@ -595,7 +598,7 @@ public class RobotUtils {
             if (deltaYaw < -180) deltaYaw += 360;
 
             // Calculate degrees per encoder tick
-            double ticksPerDegreeLeft =  deltaLeftPosition / deltaYaw;
+            double ticksPerDegreeLeft = deltaLeftPosition / deltaYaw;
             double ticksPerDegreeRight = deltaRightPosition / deltaYaw;
 
             // Update running totals
