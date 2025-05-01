@@ -145,8 +145,8 @@ public class AutonomousRed extends LinearOpMode {
         robotUtils.driveStraight(this, 15, 0.5, robotUtils.getYawIMU(), debugEnabled); // Align
         robotUtils.driveStraight(this, -10, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
         robotUtils.moveArm(this, (int) CLIP_SPECIMEN); // Move arm to right position  
-        robotUtils.driveStraight(this, -5, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
         intake.setPower(INTAKE_DEPOSIT); // Deposit specimen
+        robotUtils.driveStraight(this, -10, 0.5, robotUtils.getYawIMU(), debugEnabled); // Back up
         robotUtils.moveArm(this, (int) ARM_DOWN);
 
 
